@@ -33,3 +33,15 @@ body {
     linear-gradient(to right, #84d46c1a 1px, transparent 1px);
   background-size: 20px 20px;
 }
+
+@font-face {
+  font-family: "PP NeueBit", sans-serif;
+  src: url("/fonts/ppneuebit-bold.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.neuebit{
+  font-family: "PP NeueBit", system-ui;
+}

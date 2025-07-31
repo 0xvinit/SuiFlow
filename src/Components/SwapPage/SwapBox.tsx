@@ -4,6 +4,7 @@ import Image from "next/image";
 import { IoIosArrowDown } from "react-icons/io";
 import { ChainKey, Chain, Token } from "@/data/swapData";
 import { getCurrentChain, getCurrentToken } from "@/utils/swapUtils";
+import ConnectWalletButton from "../ConnectWallet/connectwallet";
 
 interface SwapBoxProps {
   boxNumber: 1 | 2;
@@ -16,6 +17,11 @@ interface SwapBoxProps {
   isChainDisabled: (chainKey: ChainKey, box: 1 | 2) => boolean;
   defaultChainIcon: any;
   defaultTokenIcon: any;
+  isWalletConnected?: boolean;
+walletAddress?: string | null;
+onConnectWallet?: () => void;
+onWalletAddressChange?: (address: string) => void;
+walletInputValue?: string;
 }
 
 const SwapBox = ({
@@ -29,8 +35,17 @@ const SwapBox = ({
   isChainDisabled,
   defaultChainIcon,
   defaultTokenIcon,
+  isWalletConnected,
+  walletAddress,
+  onConnectWallet,
+  onWalletAddressChange,
+  walletInputValue,
 }: SwapBoxProps) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [inputValue, setInputValue] = useState('');
+const balance = 0; // replace with actual balance from props or context
+const hasInsufficientBalance = Number(inputValue) > balance;
+
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
@@ -54,7 +69,7 @@ const SwapBox = ({
       <div className="border-4 border-black/80 rounded-2xl p-5 pb-8 h-full w-full">
         <div className="bg-black rounded-2xl p-1.5 relative grid-pattern">
           <div className="w-full h-full rounded-2xl border border-[#84d46c] relative z-10 p-6 text-white">
-            <div className="flex justify-end mb-2">Balance: 0.00 </div>
+            {boxNumber===1 ? (<div className="flex justify-end mb-2">Balance: 0.00 </div>) : (<></>)}
 
             {/* Network Selection Button */}
             <div className="relative dropdown-container">
@@ -132,12 +147,14 @@ const SwapBox = ({
 
                   {/* Token Selection */}
                   <div>
+                    {selectedChain && (
+                       <>
                     <h3 className="text-sm font-semibold text-[#84d46c] mb-2">
                       Select Token
                     </h3>
                     <div className="space-y-1">
-                      {selectedChain &&
-                        tokensByChain[selectedChain].map((token) => (
+                      {/* {selectedChain && */}
+                        {tokensByChain[selectedChain].map((token) => (
                           <div
                             key={token.name}
                             onClick={() => handleTokenSelect(token.name)}
@@ -158,6 +175,8 @@ const SwapBox = ({
                           </div>
                         ))}
                     </div>
+                    </>
+                    )}
                   </div>
                 </div>
               )}
@@ -191,25 +210,110 @@ const SwapBox = ({
               </div>
             </div>
 
-            <div className="border border-white/20 bg-[#17191a] opacity-70 rounded-md p-2 text-white/95 flex gap-2 items-center justify-between">
+            {/* <div className="border border-white/20 bg-[#17191a] opacity-70 rounded-md p-2 text-white/95 flex gap-2 items-center justify-between">
               <span className="text-white/70">
                 {selectedToken ? selectedToken : "Select Token"}
               </span>
               <span className="text-xs text-white/50">
                 0xbb4c2bab6b2de45f9c...
               </span>
-            </div>
+            </div> */}
+            {boxNumber === 1 ? (
+  <div>
+  <div
+    className={`border ${
+      hasInsufficientBalance ? 'border-red-500' : 'border-white/20'
+    } bg-[#17191a] opacity-70 rounded-md p-2 text-white/95 flex items-center justify-between gap-3`}
+  >
+    {/* Token Image */}
+    <div className="flex items-center gap-2 w-1/2">
+      {getCurrentToken(selectedChain, selectedToken)?.icon ? (
+        <Image
+          src={getCurrentToken(selectedChain, selectedToken)?.icon}
+          alt={selectedToken || 'Token'}
+          className="w-6 h-6"
+        />
+      ) : (
+        <div className="w-6 h-6 bg-gray-600 aspect-square rounded-full" />
+      )}
+      <input
+        type="number"
+        placeholder="0.00"
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        className="bg-transparent text-white text-lg outline-none w-full"
+      />
+    </div>
+
+    {/* USD Value */}
+    <div className="text-right">
+      <div className="text-white/50 text-xs">${'0.00'}</div>
+    </div>
+  </div>
+
+  {/* Error Message */}
+  {hasInsufficientBalance && (
+    <p className="text-red-500 text-sm mt-1 ml-1">Insufficient balance</p>
+  )}
+</div>
+
+) : (
+  <div className="border border-white/20 bg-[#17191a] opacity-70 rounded-md p-2 text-white/95 flex items-center justify-between gap-3">
+    {/* Token Image and Static Value */}
+    <div className="flex items-center gap-2 w-1/2">
+      {getCurrentToken(selectedChain, selectedToken)?.icon ? (
+        <Image
+          src={getCurrentToken(selectedChain, selectedToken)?.icon}
+          alt={selectedToken || 'Token'}
+          className="w-6 h-6"
+        />
+      ) : (
+        <div className="w-6 h-6 bg-gray-600 aspect-square rounded-full" />
+      )}
+      <span className="text-lg text-white">- -</span>
+    </div>
+
+    {/* USD Value */}
+    <div className="text-right">
+      {/* <div className="text-white/80 text-sm">{selectedToken || 'Token'}</div> */}
+      <div className="text-white/50 text-xs">${'250.00'}</div>
+    </div>
+  </div>
+)}
+
+
           </div>
           <div className="absolute -bottom-8 -left-8 w-[100px] h-[100px] bg-[#84d46c] blur-2xl opacity-30 rounded-full z-0" />
           <div className="absolute -bottom-8 -right-8 w-[100px] h-[100px] bg-[#84d46c] blur-2xl opacity-30 rounded-full z-0" />
           <div className="absolute -top-8 -left-8 w-[100px] h-[100px] bg-[#84d46c] blur-2xl opacity-30 rounded-full z-0" />
           <div className="absolute -top-8 -right-8 w-[100px] h-[100px] bg-[#84d46c] blur-2xl opacity-30 rounded-full z-0" />
         </div>
-        {/* <div className="mt-8 flex justify-center">
-          <button className="px-8 py-2.5 rounded-full text-black font-semibold bg-gradient-to-br from-[#fff] to-[#84d46c] shadow-inner shadow-[#84d46c]/30 transition cursor-pointer duration-300 hover:scale-105 hover:shadow-lg hover:shadow-[#84d46c]/50 uppercase">
-            Connect Wallet
-          </button>
-        </div> */}
+        {boxNumber ===1 ? (
+          <div className="mt-8 flex justify-center">
+            {!isWalletConnected ? (
+              <ConnectWalletButton/>
+            ) : (
+              <div className="flex flex-col items-center w-full">
+                <p className="text-white/70 mb-2">Connected Wallet</p>
+                <input
+                  className="w-full px-4 py-2 rounded-2xl bg-black text-white border border-[#84d46c]/50"
+                  value={walletAddress || ""}
+                  readOnly
+                />
+              </div>
+            )}
+          </div>
+        ):(
+        <div className="mt-6 flex flex-col items-center w-full">
+          <p className="text-white/70 mb-2">Enter Wallet Address</p>
+          <input
+            className="w-full px-4 py-2 rounded-2xl bg-black text-white border border-[#84d46c]/50"
+            value={walletInputValue || ""}
+            onChange={e => onWalletAddressChange?.(e.target.value)}
+            placeholder="0x..."
+          />
+        </div>
+        )}
       </div>
     </div>
   );

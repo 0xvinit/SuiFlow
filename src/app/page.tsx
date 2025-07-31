@@ -1,10 +1,9 @@
-import SwapPage from "@/Components/SwapPage";
-
+import SwapPage from "@/Components/SwapPage/SwapPage";
 
 export default function Home() {
   return (
-   <>
-   <SwapPage/>
-   </>
+    <>
+      <SwapPage />
+    </>
   );
 }
