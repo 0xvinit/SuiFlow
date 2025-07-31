@@ -5,11 +5,11 @@ import Providers from "@/providers/PrivyWrapper";
 import Navbar from "@/Components/Navbar/Navbar";
 import localFont from 'next/font/local'
 
-const neuebit = localFont({
-  src: '/fonts/ppneuebit-bold.otf', 
-  display: 'swap',
-  variable: '--font-neuebit'
-})
+// const neuebit = localFont({
+//   src: '/fonts/ppneuebit-bold.otf', 
+//   display: 'swap',
+//   variable: '--font-neuebit'
+// })
 
 
 const geistSans = Geist({
@@ -35,7 +35,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${neuebit.variable} antialiased`}
+        // className={`${geistSans.variable} ${geistMono.variable} ${neuebit.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
           <Navbar/>
