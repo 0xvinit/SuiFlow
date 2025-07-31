@@ -1,36 +1,131 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SuiFlow - Modular Swap Interface
 
-## Getting Started
+A modern, modular cryptocurrency swap interface built with Next.js, TypeScript, and Tailwind CSS.
 
-First, run the development server:
+## 🏗️ Project Structure
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### Components
+
+- **`SwapPage.tsx`** - Main container component that orchestrates the swap interface
+- **`SwapBox.tsx`** - Reusable swap box component with dropdown functionality
+- **`SwapArrow.tsx`** - Central swap arrow component
+
+### Data & Types
+
+- **`src/data/swapData.ts`** - Centralized data configuration for chains and tokens
+- **`src/utils/swapUtils.ts`** - Utility functions for chain and token operations
+
+### Hooks
+
+- **`src/hooks/useSwapState.ts`** - Custom hook for managing swap state logic
+
+## 🎯 Features
+
+### Swap Boxes
+
+- **Network Selection**: Dropdown with Arbitrum and Sui networks
+- **Token Selection**: Dynamic token list based on selected network
+- **Cross-Box Validation**: Prevents selecting the same network in both boxes
+- **Visual Feedback**: Icons, hover states, and selection indicators
+
+### State Management
+
+- **Centralized State**: All swap state managed through custom hook
+- **Type Safety**: Full TypeScript support with proper interfaces
+- **Reactive Updates**: Automatic UI updates based on state changes
+
+### UI/UX
+
+- **Modern Design**: Dark theme with green accents
+- **Responsive Layout**: Flexible component structure
+- **Smooth Animations**: GSAP-powered transitions
+- **Accessibility**: Proper ARIA labels and keyboard navigation
+
+## 🔧 Technical Implementation
+
+### Component Architecture
+
+```
+SwapPage (Container)
+├── SwapBox (Box 1)
+│   ├── Network Dropdown
+│   ├── Token Selection
+│   └── Visual Indicators
+├── SwapArrow (Center)
+└── SwapBox (Box 2)
+    ├── Network Dropdown
+    ├── Token Selection
+    └── Visual Indicators
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Data Flow
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **State Management**: `useSwapState` hook manages all swap-related state
+2. **Data Configuration**: `swapData.ts` provides centralized chain/token definitions
+3. **Utility Functions**: `swapUtils.ts` handles data transformations
+4. **Component Props**: Clean prop interfaces for component communication
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Key Benefits
 
-## Learn More
+- **Modularity**: Each component has a single responsibility
+- **Reusability**: SwapBox can be used in different contexts
+- **Maintainability**: Clear separation of concerns
+- **Scalability**: Easy to add new chains, tokens, or features
+- **Type Safety**: Full TypeScript coverage prevents runtime errors
 
-To learn more about Next.js, take a look at the following resources:
+## 🚀 Getting Started
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Install dependencies:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   ```bash
+   npm install
+   ```
 
-## Deploy on Vercel
+2. Run the development server:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+   ```bash
+   npm run dev
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+## 📁 File Structure
+
+```
+src/
+├── Components/
+│   ├── SwapPage.tsx      # Main container
+│   ├── SwapBox.tsx       # Reusable swap box
+│   └── SwapArrow.tsx     # Center arrow
+├── data/
+│   └── swapData.ts       # Chain/token configuration
+├── hooks/
+│   └── useSwapState.ts   # State management
+├── utils/
+│   └── swapUtils.ts      # Utility functions
+└── assets/
+    └── Images/           # Icons and images
+```
+
+## 🎨 Design System
+
+### Colors
+
+- **Primary**: `#84d46c` (Green accent)
+- **Background**: `#17191a` (Dark gray)
+- **Border**: `rgba(255, 255, 255, 0.2)` (White with opacity)
+
+### Components
+
+- **SwapBox**: Rounded corners, gradient borders, hover effects
+- **Dropdown**: Dark background, green highlights, smooth transitions
+- **Buttons**: Gradient backgrounds, hover animations
+
+## 🔄 Future Enhancements
+
+- [ ] Add more blockchain networks
+- [ ] Implement actual swap functionality
+- [ ] Add price feeds and exchange rates
+- [ ] Wallet integration
+- [ ] Transaction history
+- [ ] Mobile responsiveness improvements
