@@ -65,7 +65,7 @@ export default function RootLayout({
       className={`${pixelify.variable} ${vt323.variable} antialiased`}
       >
         <Providers>
-          <Navbar />
+          
           {children}
         </Providers>
       </body>

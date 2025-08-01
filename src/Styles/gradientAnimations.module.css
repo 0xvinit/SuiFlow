@@ -1,0 +1,71 @@
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  25% {
+    transform: translateY(-10px) translateX(5px);
+  }
+  50% {
+    transform: translateY(-5px) translateX(-5px);
+  }
+  75% {
+    transform: translateY(10px) translateX(3px);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.gradientOrb {
+  animation: float 6s ease-in-out infinite;
+}
+
+.gradientOrb2 {
+  animation: float 8s ease-in-out infinite reverse;
+}
+
+.gradientOrb3 {
+  animation: float 10s ease-in-out infinite;
+}
+
+.pulseOrb {
+  animation: pulse 4s ease-in-out infinite;
+}
+
+.pulseOrb2 {
+  animation: pulse 6s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+.pulseOrb3 {
+  animation: pulse 5s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+.pulseOrb4 {
+  animation: pulse 7s ease-in-out infinite;
+  animation-delay: 0.5s;
+}
+
+.rotateOrb {
+  animation: rotate 20s linear infinite;
+}

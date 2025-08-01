@@ -13,6 +13,7 @@ import { useLogin, usePrivy } from "@privy-io/react-auth";
 import SwappingDetails from "./SwappingDetails";
 import Heading from "./Heading";
 import { getCurrentToken } from "@/utils/swapUtils";
+import Footer from "./Footer";
 
 const SwapPage = () => {
   const { login } = useLogin();
@@ -168,7 +169,7 @@ const SwapPage = () => {
             </motion.div>
           )}
         </div>
-        <div className="my-16">
+        <div className="mt-16 mb-28">
           <SwappingDetails />
         </div>
       </div>
