@@ -9,13 +9,13 @@ const SwappingDetails = () => {
     <div className="bg-black border border-[#84d46c]/20 grid-pattern h-auto w-[670px] mx-auto rounded-lg text-white">
       {/* Checkbox with confirmation message */}
       <div className="flex items-center justify-between gap-3 px-4 py-6">
-      <div className="flex items-center gap-3 pr-4">
+      <div className="flex items-start gap-3 pr-4">
           <input
             type="checkbox"
             id="confirm"
             checked={isConfirmed}
             onChange={() => setIsConfirmed(!isConfirmed)}
-            className="accent-[#84d46c] mt-1"
+            className="accent-[#84d46c] mt-3"
           />
           <label htmlFor="confirm" className="text-[23px] text-white/80">
             I confirm that I’ve reviewed the details and want to proceed with this swap.

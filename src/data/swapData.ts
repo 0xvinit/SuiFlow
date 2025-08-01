@@ -1,3 +1,4 @@
+import { StaticImageData } from "next/image";
 import arbitrum from "@/assets/Images/arbone.svg";
 import eth from "@/assets/Images/eth.svg";
 import usdc from "@/assets/Images/usdc.svg";
@@ -8,13 +9,13 @@ export type ChainKey = "arbitrum" | "sui";
 
 export interface Token {
   name: string;
-  icon: any;
+  icon: string | StaticImageData;
 }
 
 export interface Chain {
   name: string;
   key: ChainKey;
-  icon: any;
+  icon: string | StaticImageData;
 }
 
 export const chains: Chain[] = [

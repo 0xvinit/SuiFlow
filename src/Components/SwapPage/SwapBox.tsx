@@ -1,10 +1,9 @@
 "use client";
 import { useState } from "react";
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import { IoIosArrowDown } from "react-icons/io";
 import { ChainKey, Chain, Token } from "@/data/swapData";
 import { getCurrentChain, getCurrentToken } from "@/utils/swapUtils";
-import ConnectWalletButton from "../ConnectWallet/connectwallet";
 
 interface SwapBoxProps {
   boxNumber: 1 | 2;
@@ -15,8 +14,8 @@ interface SwapBoxProps {
   onChainSelect: (chain: ChainKey, box: 1 | 2) => void;
   onTokenSelect: (tokenName: string, box: 1 | 2) => void;
   isChainDisabled: (chainKey: ChainKey, box: 1 | 2) => boolean;
-  defaultChainIcon: any;
-  defaultTokenIcon: any;
+  defaultChainIcon: string | StaticImageData;
+  defaultTokenIcon: string | StaticImageData;
   isWalletConnected?: boolean;
   walletAddress?: string | null;
   onConnectWallet?: () => void;
@@ -38,10 +37,8 @@ const SwapBox = ({
   defaultTokenIcon,
   isWalletConnected,
   walletAddress,
-  onConnectWallet,
   onWalletAddressChange,
   walletInputValue,
-  isAnimating = false,
 }: SwapBoxProps) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -235,7 +232,7 @@ const SwapBox = ({
                     {getCurrentToken(selectedChain, selectedToken)?.icon ? (
                       <Image
                         src={
-                          getCurrentToken(selectedChain, selectedToken)?.icon
+                          getCurrentToken(selectedChain, selectedToken)!.icon
                         }
                         alt={selectedToken || "Token"}
                         className="w-6 h-6"
@@ -272,7 +269,7 @@ const SwapBox = ({
                 <div className="flex items-center gap-2 w-1/2">
                   {getCurrentToken(selectedChain, selectedToken)?.icon ? (
                     <Image
-                      src={getCurrentToken(selectedChain, selectedToken)?.icon}
+                      src={getCurrentToken(selectedChain, selectedToken)!.icon}
                       alt={selectedToken || "Token"}
                       className="w-6 h-6"
                     />
@@ -296,31 +293,37 @@ const SwapBox = ({
           <div className="absolute -top-8 -right-8 w-[100px] h-[100px] bg-[#84d46c] blur-2xl opacity-30 rounded-full z-0" /> */}
         </div>
         {boxNumber === 1 ? (
-           <div className="mt-8 flex justify-center">
-           {!isWalletConnected ? (
-             <div className="text-center text-white/70 text-[18px] px-4">
-               <p className="mb-2 text-[24px] text-white">Wallet not connected</p>
-               <p className="text-[20px]">
-                 Please connect your wallet to proceed with the token swap.
-               </p>
-               {/* <p className="text-sm text-white/60">
+          <div className="mt-8 flex justify-center">
+            {!isWalletConnected ? (
+              <div className="text-center text-white/70 text-[18px] px-4">
+                <p className="mb-2 text-[24px] text-white">
+                  Wallet not connected
+                </p>
+                <p className="text-[20px]">
+                  Please connect your wallet to proceed with the token swap.
+                </p>
+                {/* <p className="text-sm text-white/60">
                  Your wallet address will appear here once connected.
                </p> */}
-             </div>
-           ) : (
-             <div className="flex flex-col w-full">
-               <p className="text-white/70 mb-2 ml-2 text-[24px]">Connected Wallet</p>
-               <input
-                 className="w-full text-[22px] px-3 py-2 rounded-2xl bg-black text-white/80 border border-[#84d46c]/50"
-                 value={walletAddress || ""}
-                 readOnly
-               />
-             </div>
-           )}
-         </div>
+              </div>
+            ) : (
+              <div className="flex flex-col w-full">
+                <p className="text-white/70 mb-2 ml-2 text-[24px]">
+                  Connected Wallet
+                </p>
+                <input
+                  className="w-full text-[22px] px-3 py-2 rounded-2xl bg-black text-white/80 border border-[#84d46c]/50"
+                  value={walletAddress || ""}
+                  readOnly
+                />
+              </div>
+            )}
+          </div>
         ) : (
           <div className="mt-6 flex flex-col w-full">
-            <p className="text-white/70 mb-2 ml-2 text-[24px]">Enter Wallet Address</p>
+            <p className="text-white/70 mb-2 ml-2 text-[24px]">
+              Enter Wallet Address
+            </p>
             <input
               className="w-full text-[22px] px-3 py-2 rounded-2xl bg-black text-white/80 border border-[#84d46c]/50"
               value={walletInputValue || ""}

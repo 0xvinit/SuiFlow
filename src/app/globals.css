@@ -10,6 +10,8 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-pixelify: var(--font-pixelify);
+  --font-vt323: var(--font-vt323);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -34,27 +36,34 @@ body {
   background-size: 20px 20px;
 }
 
-@font-face {
+/* @font-face {
   font-family: "PP NeueBit", sans-serif;
   src: url("/fonts/ppneuebit-bold.otf") format("opentype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
-
 @font-face {
+  font-family: "PP Mondwest", sans-serif;
+  src: url("/fonts/ppmondwest-regular.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+} */
+
+/* @font-face {
   font-family: "Sugar Peachy DEMO Black", sans-serif;
   src: url("/fonts/ppneuebit-bold.otf") format("opentype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
-}
+} */
 
 
 .neuebit{
   font-family: "PP NeueBit", system-ui;
 }
-
-.sugarpeachy{
-  font-family: "Sugar Peachy DEMO Black", system-ui;
+.mondwest{
+  font-family: "PP Mondwest", system-ui;
 }
+

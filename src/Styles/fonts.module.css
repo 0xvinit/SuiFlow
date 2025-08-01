@@ -1,0 +1,19 @@
+/* @font-face {
+    font-family: 'MyCustomFont';
+    src: url('/fonts/MyCustomFont-Regular.woff2') format('woff2'),
+         url('/fonts/MyCustomFont-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap; 
+  } */
+
+  @font-face {
+    font-family: "PP NeueBit", sans-serif;
+    src: url("/fonts/ppneuebit-bold.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+  .neuebit{
+    font-family: "PP NeueBit", system-ui;
+  }

@@ -1,22 +1,17 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { IoIosArrowRoundForward } from "react-icons/io";
+import { StaticImageData } from "next/image";
 
 interface SwapArrowProps {
   selectedToken1?: string;
   selectedToken2?: string;
-  token1Icon?: string;
-  token2Icon?: string;
+  token1Icon?: string | StaticImageData;
+  token2Icon?: string | StaticImageData;
   isAnimating?: boolean;
 }
 
-const SwapArrow = ({
-  selectedToken1,
-  selectedToken2,
-  token1Icon,
-  token2Icon,
-  isAnimating = false,
-}: SwapArrowProps) => {
+const SwapArrow = ({ isAnimating = false }: SwapArrowProps) => {
   return (
     <div className="bg-black border border-white/20 rounded-full mx-8 relative w-16 h-16 flex flex-col items-center justify-center -translate-y-10">
       <IoIosArrowRoundForward className="size-12 text-white" />

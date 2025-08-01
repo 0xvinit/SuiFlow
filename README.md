@@ -96,13 +96,16 @@ src/
 ├── Components/
 │   ├── SwapPage.tsx      # Main container
 │   ├── SwapBox.tsx       # Reusable swap box
-│   └── SwapArrow.tsx     # Center arrow
+│   ├── SwapArrow.tsx     # Center arrow
+│   └── Heading.tsx       # Animated heading with price display
 ├── data/
 │   └── swapData.ts       # Chain/token configuration
 ├── hooks/
-│   └── useSwapState.ts   # State management
+│   ├── useSwapState.ts   # State management
+│   └── useTokenPrices.ts # Price fetching hook
 ├── utils/
-│   └── swapUtils.ts      # Utility functions
+│   ├── swapUtils.ts      # Utility functions
+│   └── priceUtils.ts     # 1inch API integration
 └── assets/
     └── Images/           # Icons and images
 ```
@@ -123,9 +126,39 @@ src/
 
 ## 🔄 Future Enhancements
 
+- [x] Add price feeds and exchange rates (1inch API integration)
 - [ ] Add more blockchain networks
 - [ ] Implement actual swap functionality
-- [ ] Add price feeds and exchange rates
 - [ ] Wallet integration
 - [ ] Transaction history
 - [ ] Mobile responsiveness improvements
+
+## 🔌 API Integration
+
+### 1inch Price API
+
+The application now integrates with the 1inch Price API to fetch real-time token prices.
+
+#### Setup
+
+1. Get your API key from [1inch Developer Portal](https://portal.1inch.dev/)
+2. Create a `.env.local` file in the root directory
+3. Add your API key:
+   ```
+   NEXT_PUBLIC_ONEINCH_API_KEY=your_1inch_api_key_here
+   ```
+
+#### Supported Tokens
+
+- **ETH** (Ethereum): `0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2`
+- **USDT** (Ethereum): `0xdac17f958d2ee523a2206206994597c13d831ec7`
+- **USDC** (Arbitrum): `0xaf88d065e77c8cc2239327c5edb3a432268e5831`
+- **SUI** (Arbitrum): `0xb0505e5a99abd03d94a1169e638b78edfed26ea4`
+- **ARB** (Arbitrum): `0x912ce59144191c1204e64559fe8253a0e49e6548`
+
+#### Features
+
+- **Real-time Prices**: Automatic price updates every 30 seconds
+- **Server-side Proxy**: API calls routed through Next.js API routes to avoid CORS issues
+- **Error Handling**: Graceful fallbacks for API failures with fallback prices
+- **Loading States**: Smooth loading indicators during price fetches

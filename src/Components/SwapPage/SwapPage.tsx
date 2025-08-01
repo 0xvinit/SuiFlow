@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import arbitrum from "@/assets/Images/arbone.svg";
@@ -9,7 +9,6 @@ import SwapBox from "./SwapBox";
 import SwapArrow from "./SwapArrow";
 import { chains, tokensByChain } from "@/data/swapData";
 import { useSwapState } from "@/hooks/useSwapState";
-import ConnectWalletButton from "../ConnectWallet/connectwallet";
 import { useLogin, usePrivy } from "@privy-io/react-auth";
 import SwappingDetails from "./SwappingDetails";
 import Heading from "./Heading";

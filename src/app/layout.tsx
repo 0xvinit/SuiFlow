@@ -1,26 +1,44 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "@/providers/PrivyWrapper";
 import Navbar from "@/Components/Navbar/Navbar";
-import localFont from 'next/font/local'
+import Head from "next/head";
+import { Pixelify_Sans, VT323 } from 'next/font/google'
+const pixelify = Pixelify_Sans
+({
+  weight: ['400', '700'], // Silkscreen only has 400 and 700 weights
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-pixelify',
+})
+const vt323 = VT323({
+  weight: '400', // VT323 only has 400 weight
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-vt323',
+})
 
 // const neuebit = localFont({
-//   src: '/fonts/ppneuebit-bold.otf', 
+//   src: '/fonts/ppneuebit-bold.otf',
 //   display: 'swap',
 //   variable: '--font-neuebit'
 // })
 
+// const ppNeueBit = localFont({
+//   src: '/fonts/ppneuebit-bold.otf',
+//   variable: '--font-neuebit',
+//   display: 'swap',
+// })
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+// const geistSans = Geist({
+//   variable: "--font-geist-sans",
+//   subsets: ["latin"],
+// });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+// const geistMono = Geist_Mono({
+//   variable: "--font-geist-mono",
+//   subsets: ["latin"],
+// });
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -34,14 +52,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <Head>
+        <link
+          rel="preload"
+          href="/fonts/ppneuebit-bold.otf"
+          as="font"
+          type="font/otf"
+          crossOrigin=""
+        />
+      </Head>
       <body
-        // className={`${geistSans.variable} ${geistMono.variable} ${neuebit.variable} antialiased`}
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      className={`${pixelify.variable} ${vt323.variable} antialiased`}
       >
         <Providers>
-          <Navbar/>
+          <Navbar />
           {children}
-          </Providers>
+        </Providers>
       </body>
     </html>
   );

@@ -1,9 +1,7 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
-// import logo from '@/assets/logo.png'; // adjust path if your logo is elsewhere
-import ConnectWalletButton from '../ConnectWallet/connectwallet';
+import ConnectWallet from '@/Components/ConnectWallet/connectwallet';
 
 const Navbar = () => {
   return (
@@ -11,11 +9,11 @@ const Navbar = () => {
       {/* Logo */}
       <div className="flex items-center space-x-2">
         {/* <Image src={logo} alt="Logo" width={40} height={40} /> */}
-        <span className="font-extrabold text-[#84d46c] text-[70px] neuebit tracking-wider">Suiflow</span>
+        <span className="font-extrabold text-[#84d46c] text-[50px] font-pixelify tracking-wider">Suiflow</span>
       </div>
 
       {/* Connect Wallet Button */}
-      <ConnectWalletButton />
+      <ConnectWallet />
     </nav>
   );
 };

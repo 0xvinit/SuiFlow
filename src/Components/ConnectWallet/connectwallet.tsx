@@ -4,13 +4,13 @@ import { usePrivy } from "@privy-io/react-auth";
 import { useState, useRef } from "react";
 import { FaChevronDown, FaCopy, FaCheck } from "react-icons/fa";
 
-export default function ConnectWalletButton() {
+export default function ConnectWallet() {
   const { login, logout, authenticated, user } = usePrivy();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [selectedChain, setSelectedChain] = useState("Arbitrum");
   const openTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleCopy = () => {
     if (user?.wallet?.address) {
@@ -18,10 +18,6 @@ const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     }
-  };
-
-  const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen);
   };
 
   const handleLogin = () => login();
@@ -36,16 +32,16 @@ const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
       setDropdownOpen(true);
     }, 300); // Open after 300ms
   };
-  
+
   const handleMouseLeave = () => {
     clearTimeout(openTimeoutRef.current!);
     closeTimeoutRef.current = setTimeout(() => {
       setDropdownOpen(false);
     }, 300); // Close after 300ms
   };
-  
+
   return (
-    <div className="relative inline-block text-left neuebit">
+    <div className="relative inline-block text-left font-vt323 tracking-wider">
       {!authenticated ? (
         <button
           onClick={handleLogin}
@@ -55,19 +51,18 @@ const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
         </button>
       ) : (
         <div
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
           className="group relative"
         >
           <button className="flex items-center gap-2 px-6 py-1 rounded-full text-black font-semibold bg-gradient-to-br from-[#fff] to-[#84d46c] shadow-inner shadow-[#84d46c]/30 transition duration-300 uppercase w-fit hover:scale-105 text-[24px]">
             {selectedChain}
             <FaChevronDown size={14} />
           </button>
-
           {dropdownOpen && (
             <div className="absolute top-full mt-2 right-0 z-50 bg-[#17191a] border border-[#84d46c]/40 shadow-2xl shadow-black/50 rounded-xl p-4 w-64 space-y-4 backdrop-blur-sm">
               {/* Wallet Address + Copy */}
-              <div className="flex items-center justify-between neuebit text-[22px] bg-[#323332]/50 p-3 rounded-lg text-white font-mono border border-gray-700">
+              <div className="flex items-center justify-between text-[22px] bg-[#323332]/50 p-3 rounded-lg text-white font-mono border border-gray-700">
                 <span className="truncate w-[80%]">
                   {user?.wallet?.address?.slice(0, 6)}...
                   {user?.wallet?.address?.slice(-4)}
@@ -117,7 +112,7 @@ const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
                 Disconnect
               </button>
             </div>
-          )} 
+          )}{" "}
         </div>
       )}
     </div>
