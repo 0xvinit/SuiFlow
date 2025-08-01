@@ -108,21 +108,20 @@ const SwapPage = () => {
                 scale: 0,
                 opacity: 0,
                 x: -250, // Start from left (box 1)
-                y: -15,
+                y: -30,
               }}
               animate={{
                 scale: [0, 1.2, 1, 1.2, 0.8],
                 opacity: [0, 1, 1, 1, 0],
-                x: [-250, -125, 0, 0, 0], // Move to center of arrow
-                y: [-35, -35, -35, -38, -38],
+                x: [-250, 0], // Smooth move to center of arrow
+                y: [-30, -35], // Smooth vertical movement
               }}
               exit={{ scale: 0, opacity: 0 }}
               transition={{
                 duration: 1.8,
                 ease: "easeInOut",
-                times: [0, 0.25, 0.5, 0.75, 1],
                 repeat: Infinity,
-                repeatDelay: 1.2,
+                repeatDelay: 1.8,
               }}
             >
               <Image
@@ -143,22 +142,21 @@ const SwapPage = () => {
                 scale: 0,
                 opacity: 0,
                 x: 0, // Start from center of arrow
-                y: -15,
+                y: -30,
               }}
               animate={{
                 scale: [0, 1.2, 1, 1.2, 0.8],
                 opacity: [0, 1, 1, 1, 0],
-                x: [0, 125, 250, 260, 265], // Move to right (box 2)
-                y: [-35, -35, -35, -35, -38],
+                x: [0, 250], // Smooth move to right (box 2)
+                y: [-30, -35], // Smooth vertical movement
               }}
               exit={{ scale: 0, opacity: 0 }}
               transition={{
                 duration: 1.8,
                 ease: "easeInOut",
-                times: [0, 0.25, 0.5, 0.75, 1],
-                delay: 0.9, // Start after first token reaches arrow
+                delay: 1.8, // Start after first token reaches arrow
                 repeat: Infinity,
-                repeatDelay: 1.2,
+                repeatDelay: 1.8,
               }}
             >
               <Image
@@ -171,7 +169,7 @@ const SwapPage = () => {
             </motion.div>
           )}
         </div>
-        <div className="mt-16">
+        <div className="my-16">
           <SwappingDetails />
         </div>
       </div>

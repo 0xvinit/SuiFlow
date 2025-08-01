@@ -127,9 +127,9 @@ const Heading = () => {
       }}
       onMouseMove={handleMouseMove}
     >
-      <h1 className="text-[70px]">Cross Chain Swap</h1>
+      <h1 className="text-[100px] leading-[100px]">Cross Chain Swap</h1>
 
-      <div className="text-[50px] relative h-28 flex items-center justify-center overflow-hidden">
+      <div className="text-[70px] relative h-28 flex items-center justify-center overflow-hidden">
         <AnimatePresence mode="wait">
           {show && (
             <motion.div
@@ -146,7 +146,7 @@ const Heading = () => {
                   alt={currentToken.name}
                   width={40}
                   height={40}
-                  className="rounded-full"
+                  className="rounded-full translate-y-1"
                 />
               </motion.div>
 
@@ -168,7 +168,7 @@ const Heading = () => {
       {/* Tooltip */}
       <div
         ref={tooltipRef}
-        className={`pointer-events-none fixed z-50 px-3 py-2 rounded-xl shadow-lg backdrop-blur-sm border bg-white/90 text-black text-sm transition-opacity duration-300 ${
+        className={`pointer-events-none fixed z-50 px-5 py-2 rounded-xl shadow-lg backdrop-blur-sm border bg-white/90 text-black text-sm transition-opacity duration-300 ${
           tooltipVisible ? "opacity-100" : "opacity-0"
         }`}
         style={{
@@ -176,7 +176,7 @@ const Heading = () => {
           marginTop: "-10px",
         }}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Image
             src={currentToken.icon}
             alt={currentToken.name}
@@ -185,8 +185,8 @@ const Heading = () => {
             className="rounded-full"
           />
           <div>
-            <div className="font-semibold">{currentToken.name}</div>
-            <div className="text-xs">{currentToken.price}</div>
+            <div className="font-semibold text-xl leading-4 mb-1">{currentToken.name}</div>
+            <div className="text-base leading-4">{currentToken.price}</div>
           </div>
         </div>
       </div>

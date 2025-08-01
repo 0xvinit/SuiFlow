@@ -70,7 +70,9 @@ const SwapBox = ({
       <div className="border-4 border-black/80 rounded-2xl p-5 pb-8 h-full w-full">
         <div className="bg-black rounded-2xl p-1.5 relative grid-pattern">
           <div className="w-full h-full rounded-2xl border border-[#84d46c] relative p-6 text-white">
-            <div className="flex justify-end mb-2">Balance: 0.00 </div>
+            <div className="flex justify-end mb-2 text-[22px]">
+              Balance: 0.00{" "}
+            </div>
 
             {/* Network Selection Button */}
             <div className="relative dropdown-container">
@@ -78,7 +80,7 @@ const SwapBox = ({
                 className="border border-white/20 bg-[#17191a] opacity-70 rounded-md p-2 mb-3 text-white/95 flex gap-2 items-center justify-between cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={toggleDropdown}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 text-[23px]">
                   {selectedChain ? (
                     <>
                       <Image
@@ -87,11 +89,11 @@ const SwapBox = ({
                           defaultChainIcon
                         }
                         alt={getCurrentChain(selectedChain)?.name || "Network"}
-                        className="w-5 h-5"
+                        className="size-6"
                       />
                       <span>
                         {getCurrentChain(selectedChain)?.name}
-                        <sub className="text-xs text-white/70 ml-1">
+                        <sub className="text-sm text-white/70 ml-1">
                           {selectedToken ? `(${selectedToken})` : "(Token)"}
                         </sub>
                       </span>
@@ -109,10 +111,10 @@ const SwapBox = ({
 
               {/* Dropdown Menu */}
               {dropdownOpen && (
-                <div className="absolute top-full left-0 right-0 z-50 bg-[#1c1f20] border border-[#84d46c]/20 rounded-lg shadow-lg mt-1 p-3">
+                <div className="absolute top-full left-0 right-0 z-50 bg-[#1c1f20] border border-[#84d46c]/20 rounded-lg shadow-lg mt-1 p-3 text-[22px]">
                   {/* Network Selection */}
                   <div className="mb-4">
-                    <h3 className="text-sm font-semibold text-[#84d46c] mb-2">
+                    <h3 className="font-semibold text-[#84d46c] mb-2">
                       Select Network
                     </h3>
                     <div className="flex gap-2">
@@ -122,7 +124,7 @@ const SwapBox = ({
                           onClick={() =>
                             handleChainSelect(chain.key as ChainKey)
                           }
-                          className={`flex flex-col items-center p-2 rounded-lg border cursor-pointer transition ${
+                          className={`flex flex-col items-center p-2 w-20 rounded-lg border cursor-pointer transition ${
                             selectedChain === chain.key
                               ? "border-[#84d46c] bg-[#84d46c]/10"
                               : isChainDisabled(
@@ -138,7 +140,7 @@ const SwapBox = ({
                             alt={chain.name}
                             className="w-8 h-8 mb-1"
                           />
-                          <span className="text-xs text-white/90">
+                          <span className="text-[20px] text-white/90">
                             {chain.name}
                           </span>
                         </div>
@@ -150,7 +152,7 @@ const SwapBox = ({
                   <div>
                     {selectedChain && (
                       <>
-                        <h3 className="text-sm font-semibold text-[#84d46c] mb-2">
+                        <h3 className="text-[22px] font-semibold text-[#84d46c] mb-2">
                           Select Token
                         </h3>
                         <div className="space-y-1">
@@ -170,7 +172,7 @@ const SwapBox = ({
                                 alt={token.name}
                                 className="w-5 h-5"
                               />
-                              <span className="text-white/90 text-sm">
+                              <span className="text-white/90 text-[20px]">
                                 {token.name}
                               </span>
                             </div>
@@ -246,19 +248,20 @@ const SwapBox = ({
                       placeholder="0.00"
                       value={inputValue}
                       onChange={(e) => setInputValue(e.target.value)}
-                      className="bg-transparent text-white text-lg outline-none w-full"
+                      // className="bg-transparent text-white text-[22px] outline-none w-full"
+                      className="bg-transparent text-white text-[22px] outline-none w-full appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
 
                   {/* USD Value */}
                   <div className="text-right">
-                    <div className="text-white/50 text-xs">${"0.00"}</div>
+                    <div className="text-white/50 text-lg">~${"0.00"}</div>
                   </div>
                 </div>
 
                 {/* Error Message */}
                 {hasInsufficientBalance && (
-                  <p className="text-red-500 text-sm mt-1 ml-1">
+                  <p className="text-red-500 text-lg ml-1">
                     Insufficient balance
                   </p>
                 )}
@@ -276,42 +279,50 @@ const SwapBox = ({
                   ) : (
                     <div className="w-6 h-6 bg-gray-600 aspect-square rounded-full" />
                   )}
-                  <span className="text-lg text-white">- -</span>
+                  <span className="text-[22px] text-white">- -</span>
                 </div>
 
                 {/* USD Value */}
                 <div className="text-right">
                   {/* <div className="text-white/80 text-sm">{selectedToken || 'Token'}</div> */}
-                  <div className="text-white/50 text-xs">${"250.00"}</div>
+                  <div className="text-white/50 text-lg">${"250.00"}</div>
                 </div>
               </div>
             )}
           </div>
-          <div className="absolute -bottom-8 -left-8 w-[100px] h-[100px] bg-[#84d46c] blur-2xl opacity-30 rounded-full z-0" />
+          {/* <div className="absolute -bottom-8 -left-8 w-[100px] h-[100px] bg-[#84d46c] blur-2xl opacity-30 rounded-full z-0" />
           <div className="absolute -bottom-8 -right-8 w-[100px] h-[100px] bg-[#84d46c] blur-2xl opacity-30 rounded-full z-0" />
           <div className="absolute -top-8 -left-8 w-[100px] h-[100px] bg-[#84d46c] blur-2xl opacity-30 rounded-full z-0" />
-          <div className="absolute -top-8 -right-8 w-[100px] h-[100px] bg-[#84d46c] blur-2xl opacity-30 rounded-full z-0" />
+          <div className="absolute -top-8 -right-8 w-[100px] h-[100px] bg-[#84d46c] blur-2xl opacity-30 rounded-full z-0" /> */}
         </div>
         {boxNumber === 1 ? (
-          <div className="mt-8 flex justify-center">
-            {!isWalletConnected ? (
-              <ConnectWalletButton />
-            ) : (
-              <div className="flex flex-col items-center w-full">
-                <p className="text-white/70 mb-2">Connected Wallet</p>
-                <input
-                  className="w-full px-4 py-2 rounded-2xl bg-black text-white border border-[#84d46c]/50"
-                  value={walletAddress || ""}
-                  readOnly
-                />
-              </div>
-            )}
-          </div>
+           <div className="mt-8 flex justify-center">
+           {!isWalletConnected ? (
+             <div className="text-center text-white/70 text-[18px] px-4">
+               <p className="mb-2 text-[24px] text-white">Wallet not connected</p>
+               <p className="text-[20px]">
+                 Please connect your wallet to proceed with the token swap.
+               </p>
+               {/* <p className="text-sm text-white/60">
+                 Your wallet address will appear here once connected.
+               </p> */}
+             </div>
+           ) : (
+             <div className="flex flex-col w-full">
+               <p className="text-white/70 mb-2 ml-2 text-[24px]">Connected Wallet</p>
+               <input
+                 className="w-full text-[22px] px-3 py-2 rounded-2xl bg-black text-white/80 border border-[#84d46c]/50"
+                 value={walletAddress || ""}
+                 readOnly
+               />
+             </div>
+           )}
+         </div>
         ) : (
-          <div className="mt-6 flex flex-col items-center w-full">
-            <p className="text-white/70 mb-2">Enter Wallet Address</p>
+          <div className="mt-6 flex flex-col w-full">
+            <p className="text-white/70 mb-2 ml-2 text-[24px]">Enter Wallet Address</p>
             <input
-              className="w-full px-4 py-2 rounded-2xl bg-black text-white border border-[#84d46c]/50"
+              className="w-full text-[22px] px-3 py-2 rounded-2xl bg-black text-white/80 border border-[#84d46c]/50"
               value={walletInputValue || ""}
               onChange={(e) => onWalletAddressChange?.(e.target.value)}
               placeholder="0x..."
