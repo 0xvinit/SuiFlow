@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React from 'react';
-import ConnectWallet from '@/Components/ConnectWallet/connectwallet';
+import React from "react";
+import ConnectWallet from "@/Components/ConnectWallet/connectwallet";
 
 const Navbar = () => {
   return (
@@ -9,10 +9,12 @@ const Navbar = () => {
       {/* Logo */}
       <div className="flex items-center space-x-2">
         {/* <Image src={logo} alt="Logo" width={40} height={40} /> */}
-        <span className="font-extrabold text-[#84d46c] text-[50px] font-pixelify tracking-wider">Suiflow</span>
+        <span className="font-extrabold text-[#84d46c] text-[50px] font-pixelify tracking-wider">
+          Suiflow
+        </span>
       </div>
 
-      {/* Connect Wallet Button */}
+      {/* Connect Wallet and Chain Selector */}
       <ConnectWallet />
     </nav>
   );
