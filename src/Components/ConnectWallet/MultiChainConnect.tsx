@@ -261,10 +261,22 @@ export const MultiChainConnect: React.FC<MultiChainConnectProps> = ({
         </div>
       )}
 
-      {/* Chain Selector Modal */}
-      {showChainSelector && !isAnyWalletConnected && (
-        <div className="fixed inset-0 z-50 backdrop-blur-md bg-black/80 ">
-          <div className="bg-[#17191a] border border-[#84d46c]/20 rounded-2xl p-8 max-w-md w-full shadow-2xl m-auto translate-y-[55%]">
+      
+
+      {/* Sui Wallet Selector Modal */}
+      {showSuiWalletSelector && (
+        <SuiWalletSelector
+          onWalletSelect={handleSuiWalletSelect}
+          onClose={() => setShowSuiWalletSelector(false)}
+        />
+      )}
+    </div>
+
+    {/* Chain Selector Modal */}
+    {showChainSelector && !isAnyWalletConnected && (
+        <div className="fixed inset-0 z-50 backdrop-blur-md bg-black/80 h-screen">
+          <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#17191a] border border-[#84d46c]/20 rounded-2xl p-8 max-w-md w-full shadow-2xl">
+
             <div className="text-center mb-6">
               <h3 className="text-3xl font-vt323 text-white tracking-wider mb-2">
                 Choose Network
@@ -327,15 +339,6 @@ export const MultiChainConnect: React.FC<MultiChainConnectProps> = ({
           </div>
         </div>
       )}
-
-      {/* Sui Wallet Selector Modal */}
-      {showSuiWalletSelector && (
-        <SuiWalletSelector
-          onWalletSelect={handleSuiWalletSelect}
-          onClose={() => setShowSuiWalletSelector(false)}
-        />
-      )}
-    </div>
     </>
   );
 };

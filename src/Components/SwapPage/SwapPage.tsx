@@ -14,10 +14,13 @@ import SwappingDetails from "./SwappingDetails";
 import Heading from "./Heading";
 import { getCurrentToken } from "@/utils/swapUtils";
 import { useTokenToTokenConversion } from "@/hooks/useTokenToTokenConversion";
+import { useMultiChainWallet } from "@/hooks/useMultiChainWallet";
+import { MultiChainConnect } from "../ConnectWallet/MultiChainConnect";
 
 const SwapPage = () => {
   const { login } = useLogin();
   const { authenticated, user } = usePrivy();
+  const { evmWallet, suiWallet, isAnyWalletConnected, isWrongChain } = useMultiChainWallet();
 
   const [walletInputValue, setWalletInputValue] = useState("");
   const [isArrowAnimating, setIsArrowAnimating] = useState(false);
@@ -75,9 +78,6 @@ const SwapPage = () => {
             isChainDisabled={isChainDisabled}
             defaultChainIcon={arbitrum}
             defaultTokenIcon={eth}
-            isWalletConnected={authenticated}
-            walletAddress={user?.wallet?.address || ""}
-            onConnectWallet={login}
             isAnimating={isArrowAnimating}
             inputValue={inputValue1}
             onInputChange={(value: string) => setInputValue(value, 1)}
