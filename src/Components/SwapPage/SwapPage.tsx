@@ -13,11 +13,14 @@ import { useLogin, usePrivy } from "@privy-io/react-auth";
 import SwappingDetails from "./SwappingDetails";
 import Heading from "./Heading";
 import { getCurrentToken } from "@/utils/swapUtils";
-import Footer from "./Footer";
+import { useTokenToTokenConversion } from "@/hooks/useTokenToTokenConversion";
+import { useMultiChainWallet } from "@/hooks/useMultiChainWallet";
+import { MultiChainConnect } from "../ConnectWallet/MultiChainConnect";
 
 const SwapPage = () => {
   const { login } = useLogin();
   const { authenticated, user } = usePrivy();
+  const { evmWallet, suiWallet, isAnyWalletConnected, isWrongChain } = useMultiChainWallet();
 
   const [walletInputValue, setWalletInputValue] = useState("");
   const [isArrowAnimating, setIsArrowAnimating] = useState(false);
@@ -27,14 +30,22 @@ const SwapPage = () => {
     selectedChain2,
     selectedToken1,
     selectedToken2,
+    inputValue1,
     selectChain,
     selectToken,
+    setInputValue,
     isChainDisabled,
   } = useSwapState();
 
   // Get token icons for animation
   const token1Data = getCurrentToken(selectedChain1, selectedToken1);
   const token2Data = getCurrentToken(selectedChain2, selectedToken2);
+
+  const { convertedValue, isLoading } = useTokenToTokenConversion(
+    selectedToken1,
+    selectedToken2,
+    inputValue1 || "0"
+  );
 
   // Trigger animation when both tokens are selected
   useEffect(() => {
@@ -67,10 +78,9 @@ const SwapPage = () => {
             isChainDisabled={isChainDisabled}
             defaultChainIcon={arbitrum}
             defaultTokenIcon={eth}
-            isWalletConnected={authenticated}
-            walletAddress={user?.wallet?.address || ""}
-            onConnectWallet={login}
             isAnimating={isArrowAnimating}
+            inputValue={inputValue1}
+            onInputChange={(value: string) => setInputValue(value, 1)}
           />
 
           {/* Swap arrow */}
@@ -97,6 +107,8 @@ const SwapPage = () => {
             walletInputValue={walletInputValue}
             onWalletAddressChange={setWalletInputValue}
             isAnimating={isArrowAnimating}
+            convertedValue={convertedValue}
+            // isLoading={isLoading}
           />
 
           {/* Floating Token Animations - Positioned above everything */}

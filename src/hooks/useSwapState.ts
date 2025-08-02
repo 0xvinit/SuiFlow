@@ -7,6 +7,7 @@ export const useSwapState = () => {
   const [selectedChain2, setSelectedChain2] = useState<ChainKey | null>(null);
   const [selectedToken1, setSelectedToken1] = useState<string>("");
   const [selectedToken2, setSelectedToken2] = useState<string>("");
+  const [inputValue1, setInputValue1] = useState<string>("");
 
   const selectChain = (chain: ChainKey, box: 1 | 2) => {
     if (box === 1) {
@@ -28,6 +29,12 @@ export const useSwapState = () => {
     }
   };
 
+  const setInputValue = (value: string, box: 1 | 2) => {
+    if (box === 1) {
+      setInputValue1(value);
+    }
+  };
+
   // Check if a chain is disabled (selected in other box)
   const isChainDisabled = (chainKey: ChainKey, box: 1 | 2) => {
     if (box === 1) {
@@ -42,8 +49,10 @@ export const useSwapState = () => {
     selectedChain2,
     selectedToken1,
     selectedToken2,
+    inputValue1,
     selectChain,
     selectToken,
+    setInputValue,
     isChainDisabled,
   };
 };
