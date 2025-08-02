@@ -1,12 +1,16 @@
 "use client";
 import React, { useState } from 'react';
 import { useWallets, useConnectWallet, useCurrentWallet } from '@mysten/dapp-kit';
-
+import slush from "@/assets/Images/slush.png"
+import suiet from "@/assets/Images/suiet.png"
+import okx from "@/assets/Images/okx.png"
+import martian from "@/assets/Images/martian.png"
+import Image from 'next/image';
+import { IoClose } from "react-icons/io5";
 interface SuiWalletSelectorProps {
   onWalletSelect: (walletName: string) => void;
   onClose: () => void;
 }
-
 // Define available Sui wallets with their installation links
 const SUI_WALLETS = [
   {
@@ -14,7 +18,7 @@ const SUI_WALLETS = [
     alternativeNames: ['SLush Wallet', 'Slush - A Sui Wallet', 'SLush', 'Slush Wallet', 'Slush', 'SUI Wallet'],
     displayName: 'Sui Wallet (Slush)',
     description: 'Official Sui wallet',
-    icon: '🔵',
+    icon: slush,
     installUrl: 'https://chromewebstore.google.com/detail/sui-wallet/opcgpfmipidbgpenhmajoajpbobppdil',
     color: 'from-blue-500 to-blue-600'
   },
@@ -23,7 +27,7 @@ const SUI_WALLETS = [
     alternativeNames: [],
     displayName: 'Suiet',
     description: 'Modern Sui wallet',
-    icon: '🟣',
+    icon: suiet,
     installUrl: 'https://chrome.google.com/webstore/detail/suiet/khpkpbbcccdmmclmpigdgddabeilkdpd',
     color: 'from-purple-500 to-purple-600'
   },
@@ -32,7 +36,7 @@ const SUI_WALLETS = [
     alternativeNames: [],
     displayName: 'OKX Wallet',
     description: 'Multi-chain wallet',
-    icon: '🟡',
+    icon: okx,
     installUrl: 'https://chrome.google.com/webstore/detail/okx-wallet/mcohilncbfahbmgdjkbpemcciiolgcge',
     color: 'from-yellow-500 to-yellow-600'
   },
@@ -41,7 +45,7 @@ const SUI_WALLETS = [
     alternativeNames: [],
     displayName: 'Martian',
     description: 'Multi-chain wallet',
-    icon: '🟢',
+    icon: martian,
     installUrl: 'https://chrome.google.com/webstore/detail/martian-wallet/efbglgofoippbgcjepnhiblaibcnclgk',
     color: 'from-green-500 to-green-600'
   }
@@ -142,20 +146,20 @@ export const SuiWalletSelector: React.FC<SuiWalletSelectorProps> = ({ onWalletSe
   });
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm">
-      <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-2xl p-8 max-w-2xl w-full mx-4 shadow-2xl max-h-[80vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/80 z-50 backdrop-blur-md">
+      <div className="bg-[#17191a] border border-[#84d46c]/20 rounded-2xl p-8 max-w-2xl w-full mx-auto shadow-2xl max-h-[80vh] translate-y-[60%]">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h3 className="text-2xl font-vt323 text-white tracking-wider">Select Sui Wallet</h3>
-            <p className="text-gray-400 font-vt323 text-sm mt-1">
+            <h3 className="text-3xl font-vt323 text-white tracking-wider">Select Sui Wallet</h3>
+            <p className="text-white/80 font-vt323 text-lg mt-1">
               {wallets.length > 0 ? `${wallets.length} wallet(s) detected` : 'No wallets detected'}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white text-2xl transition-colors"
+            className="text-gray-400 hover:text-white text-2xl transition-colors hover:bg-[#2b2e30] cursor-pointer rounded-full p-1"
           >
-            ×
+            <IoClose/>
           </button>
         </div>
         
@@ -173,26 +177,32 @@ export const SuiWalletSelector: React.FC<SuiWalletSelectorProps> = ({ onWalletSe
                   // Available wallet - clickable
                   <button
                     onClick={() => handleWalletSelect(walletNameToUse)}
-                    className={`w-full p-4 rounded-xl border transition-all duration-300 transform hover:scale-105 group ${
+                    className={`w-full cursor-pointer p-4 rounded-xl border transition-all duration-300 transform hover:scale-105 group ${
                       isSelected 
-                        ? 'bg-gradient-to-r from-purple-600 to-purple-700 border-purple-500 shadow-lg' 
-                        : 'bg-gradient-to-r from-gray-800 to-gray-700 border-gray-600 hover:border-purple-500'
+                        ? 'bg-gradient-to-r from-[#84d46c]/70 to-[#84d46c]/20 border-[#84d46c]/30 shadow-lg' 
+                        : 'hover:bg-[#84d46c]/10 border border-[#84d46c]/30 hover:border-[#84d46c]/50'
                     }`}
                   >
                     <div className="flex items-center space-x-4">
                       <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl group-hover:scale-110 transition-transform ${
                         isSelected ? 'bg-purple-500' : 'bg-gray-600'
                       }`}>
-                        {wallet.icon}
+                        <Image
+    src={wallet.icon}
+    alt={wallet.displayName}
+    width={48}
+    height={48}
+    className="object-contain rounded-full"
+  />
                       </div>
                       <div className="text-left flex-1">
                         <div className="flex items-center space-x-2">
                           <span className="text-white font-vt323 text-lg tracking-wider">{wallet.displayName}</span>
                           {isConnected && (
-                            <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">Connected</span>
+                            <span className="bg-green-500 text-white text-lg px-2 py-1 rounded-full">Connected</span>
                           )}
                         </div>
-                        <div className="text-gray-400 font-vt323 text-sm">{wallet.description}</div>
+                        <div className="text-white/80 font-vt323 text-base">{wallet.description}</div>
                       </div>
                     </div>
                   </button>
@@ -202,18 +212,24 @@ export const SuiWalletSelector: React.FC<SuiWalletSelectorProps> = ({ onWalletSe
                     href={wallet.installUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full p-4 rounded-xl border border-gray-600 bg-gradient-to-r from-gray-800 to-gray-700 hover:from-gray-700 hover:to-gray-600 transition-all duration-300 transform hover:scale-105 group block"
+                    className="w-full p-4 rounded-xl border border-[#84d46c]/30 hover:border-[#84d46c]/50 hover:bg-[#84d46c]/10 transition-all duration-300 transform hover:scale-105 group block"
                   >
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-                        {wallet.icon}
+                      <Image
+    src={wallet.icon}
+    alt={wallet.displayName}
+    width={48}
+    height={48}
+    className="object-contain rounded-full"
+  />
                       </div>
                       <div className="text-left flex-1">
                         <div className="flex items-center space-x-2">
                           <span className="text-gray-300 font-vt323 text-lg tracking-wider">{wallet.displayName}</span>
                           <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">Install</span>
                         </div>
-                        <div className="text-gray-500 font-vt323 text-sm">{wallet.description}</div>
+                        <div className="text-white/70 font-vt323 text-base">{wallet.description}</div>
                       </div>
                       <div className="text-gray-400 group-hover:text-white transition-colors">
                         ↗
@@ -231,10 +247,10 @@ export const SuiWalletSelector: React.FC<SuiWalletSelectorProps> = ({ onWalletSe
             <button
               onClick={handleConnect}
               disabled={connecting === selectedWallet}
-              className={`w-full py-4 px-6 rounded-xl font-vt323 text-lg tracking-wider transition-all duration-300 transform shadow-lg ${
+              className={`w-full py-4 px-6 rounded-xl font-vt323 text-[22px] tracking-wider transition-all duration-300 transform shadow-lg ${
                 connecting === selectedWallet
                   ? 'bg-gray-600 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 hover:scale-105'
+                  : 'bg-gradient-to-r from-[#84d46c]/70 to-[#84d46c]/20from-[#84d46c]/80 to-[#84d46c]/20 cursor-pointer hover:scale-105'
               } text-white`}
             >
               {connecting === selectedWallet ? (
@@ -256,10 +272,10 @@ export const SuiWalletSelector: React.FC<SuiWalletSelectorProps> = ({ onWalletSe
         )}
         
         <div className="text-center">
-          <p className="text-gray-400 font-vt323 text-sm">
+          <p className="text-gray-400 font-vt323 text-lg">
             Make sure your wallet extension is installed and unlocked
           </p>
-          <p className="text-gray-500 font-vt323 text-xs mt-1">
+          <p className="text-gray-500 font-vt323 text-base mt-1">
             Click on a wallet to connect, or install a new one from the links above
           </p>
         </div>

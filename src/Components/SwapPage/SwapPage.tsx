@@ -13,9 +13,7 @@ import { useLogin, usePrivy } from "@privy-io/react-auth";
 import SwappingDetails from "./SwappingDetails";
 import Heading from "./Heading";
 import { getCurrentToken } from "@/utils/swapUtils";
-import Footer from "./Footer";
 import { useTokenToTokenConversion } from "@/hooks/useTokenToTokenConversion";
-// import TokenToTokenConverter from "./TokenToTokenConverter";
 
 const SwapPage = () => {
   const { login } = useLogin();
