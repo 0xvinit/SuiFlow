@@ -182,7 +182,13 @@ const SwapPage = () => {
           )}
         </div>
         <div className="mt-16 mb-28">
-          <SwappingDetails />
+          <SwappingDetails 
+            ethAmount={inputValue1}
+            selectedToken1={selectedToken1}
+            selectedToken2={selectedToken2}
+            selectedChain1={selectedChain1}
+            selectedChain2={selectedChain2}
+          />
         </div>
       </div>
     </>
