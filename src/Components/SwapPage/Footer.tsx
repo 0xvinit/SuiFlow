@@ -99,17 +99,17 @@ const Footer = () => {
         </div>
 
         {/* Footer Links */}
-        <div className="flex justify-between items-center text-white/70 text-sm">
+        <div className="flex items-center justify-center text-white/70 text-lg">
           <div className="flex items-center gap-6">
-            <span className="font-semibold">transferto.xyz © 2024</span>
-            <a href="#" className="hover:text-[#84d46c] transition-colors">
+          <span className="font-semibold">Made with magic ✨ by Suiflow • 2025</span>
+            {/* <a href="#" className="hover:text-[#84d46c] transition-colors">
               Privacy
             </a>
             <a href="#" className="hover:text-[#84d46c] transition-colors">
               Terms & Conditions
-            </a>
+            </a> */}
           </div>
-          <div className="flex items-center gap-6">
+          {/* <div className="flex items-center gap-6">
             <a href="#" className="hover:text-[#84d46c] transition-colors">
               Medium
             </a>
@@ -119,7 +119,7 @@ const Footer = () => {
             <a href="#" className="hover:text-[#84d46c] transition-colors">
               Discord
             </a>
-          </div>
+          </div> */}
         </div>
       </div>
 

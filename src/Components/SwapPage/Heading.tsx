@@ -1,3 +1,4 @@
+// Heading.tsx
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -8,85 +9,14 @@ import {
 } from "framer-motion";
 import Image from "next/image";
 import gsap from "gsap";
-import Eth from "@/assets/Images/eth.svg";
-import Sui from "@/assets/Images/sui.png";
-import arb from "@/assets/Images/arbone.svg";
-import usdt from "@/assets/Images/usdt.svg";
-import usdc from "@/assets/Images/usdc.svg";
-
-// Chain and token address mapping
-const TOKEN_METADATA = [
-  {
-    name: "ETH",
-    icon: Eth,
-    color: "#383c4c",
-    chain: 1,
-    address: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-  },
-  {
-    name: "USDC",
-    icon: usdc,
-    color: "#2775CA",
-    chain: 42161,
-    address: "0xaf88d065e77c8cc2239327c5edb3a432268e5831",
-  },
-  {
-    name: "USDT",
-    icon: usdt,
-    color: "#26A17B",
-    chain: 1,
-    address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
-  },
-  {
-    name: "SUI",
-    icon: Sui,
-    color: "#4ca3ff",
-    chain: 42161,
-    address: "0xb0505e5a99abd03d94a1169e638b78edfed26ea4",
-  },
-  {
-    name: "ARB",
-    icon: arb,
-    color: "#12aaff",
-    chain: 42161,
-    address: "0x912ce59144191c1204e64559fe8253a0e49e6548",
-  },
-];
+import useTokenPrices from "@/hooks/useTokenPrice";
 
 const Heading = () => {
-  const [tokens, setTokens] = useState(
-    TOKEN_METADATA.map((token) => ({ ...token, price: "Loading..." }))
-  );
-
+  const tokens = useTokenPrices();
   const [index, setIndex] = useState(0);
   const [show, setShow] = useState(true);
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const fetchPrices = async () => {
-      try {
-        const updated = await Promise.all(
-          TOKEN_METADATA.map(async (token) => {
-            const res = await fetch(
-              `/api/prices?chain=${token.chain}&address=${token.address}`
-            );
-
-            if (!res.ok) throw new Error("Price fetch failed");
-            const data = await res.json()
-            const price = data[token.address];
-            return { ...token, price: `$${Number(price).toFixed(2)}` };
-          })
-        );
-        setTokens(updated);
-      } catch (err) {
-        console.error("Failed to fetch prices:", err);
-        setTokens(TOKEN_METADATA.map((token) => ({ ...token, price: "N/A" })));
-      }
-    };
-
-    fetchPrices();
-  }, []);
 
   useEffect(() => {
     const duration = 5000;
@@ -116,7 +46,6 @@ const Heading = () => {
 
   const currentToken = tokens[index];
 
-  // Animation variants (unchanged)
   const containerVariants = {
     initial: {},
     animate: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } },
@@ -154,14 +83,16 @@ const Heading = () => {
 
   return (
     <div
-      className={`mx-auto text-center font-bold relative w-full mb-8`}
+      className={`mx-auto text-center font-bold relative w-full mb-4 xl:mb-6`}
       onMouseEnter={() => setTooltipVisible(true)}
       onMouseLeave={() => setTooltipVisible(false)}
       onMouseMove={handleMouseMove}
     >
-      <h1 className={`text-[80px] leading-[100px] tracking-wider uppercase font-vt323`}>Cross Chain Swap</h1>
+      <h1 className={`text-[60px] lg:text-[70px] xl:text-[80px] leading-[70px] lg:leading-[80px] xl:leading-[100px] tracking-wider uppercase font-vt323`}>
+        Cross Chain Swap
+      </h1>
 
-      <div className="text-[60px] relative h-28 flex items-center justify-center overflow-hidden">
+      <div className="text-[40px] lg:text-[50px] xl:text-[60px] relative h-20 xl:h-24 2xl:h-28 flex items-center justify-center overflow-hidden">
         <AnimatePresence mode="wait">
           {show && (
             <motion.div

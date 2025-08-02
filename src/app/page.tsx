@@ -46,7 +46,6 @@ export default function Home() {
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
 
-      console.log("Mouse position:", x, y); // Debug log
 
       // Animate primary gradient orb
       gsap.to(gradientOrb, {

@@ -9,7 +9,7 @@ const Navbar = () => {
       {/* Logo */}
       <div className="flex items-center space-x-2">
         {/* <Image src={logo} alt="Logo" width={40} height={40} /> */}
-        <span className="font-extrabold text-[#84d46c] text-[50px] font-pixelify tracking-wider">Suiflow</span>
+        <span className="font-extrabold text-[#84d46c] text-[35px] lg:text-[40px] xl:text-[50px] font-pixelify tracking-wider leading-[50px]">Suiflow</span>
       </div>
 
       {/* Connect Wallet Button */}

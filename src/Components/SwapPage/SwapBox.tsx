@@ -4,6 +4,7 @@ import Image, { StaticImageData } from "next/image";
 import { IoIosArrowDown } from "react-icons/io";
 import { ChainKey, Chain, Token } from "@/data/swapData";
 import { getCurrentChain, getCurrentToken } from "@/utils/swapUtils";
+import { useTokenUSDValue } from "@/hooks/useTokenPrice";
 
 interface SwapBoxProps {
   boxNumber: 1 | 2;
@@ -42,8 +43,11 @@ const SwapBox = ({
 }: SwapBoxProps) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  const balance = 0; // replace with actual balance from props or context
+  const balance = 3; // replace with actual balance from props or context
   const hasInsufficientBalance = Number(inputValue) > balance;
+
+  // Use token USD value hook
+  const { usdValue, isLoading } = useTokenUSDValue(selectedToken, inputValue);
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
@@ -252,7 +256,9 @@ const SwapBox = ({
 
                   {/* USD Value */}
                   <div className="text-right">
-                    <div className="text-white/50 text-lg">~${"0.00"}</div>
+                    <div className="text-white/50 text-lg">
+                      {isLoading ? "Loading..." : `~$${usdValue.toFixed(2)}`}
+                    </div>
                   </div>
                 </div>
 
