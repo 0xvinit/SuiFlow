@@ -27,14 +27,35 @@ const getEthereumProvider = (): EthereumProvider | undefined => {
   return undefined;
 };
 
-// Arbitrum One Chain ID
-const ARBITRUM_CHAIN_ID = 42161;
+// Supported networks
+const SUPPORTED_NETWORKS = {
+  ARBITRUM_ONE: {
+    chainId: 42161,
+    name: 'Arbitrum One',
+    rpcUrl: 'https://arb1.arbitrum.io/rpc',
+    explorerUrl: 'https://arbiscan.io/',
+  },
+  ARBITRUM_SEPOLIA: {
+    chainId: 421614,
+    name: 'Arbitrum Sepolia',
+    rpcUrl: 'https://sepolia-rollup.arbitrum.io/rpc',
+    explorerUrl: 'https://sepolia.arbiscan.io/',
+  }
+};
+
+const SUI_NETWORKS = {
+  MAINNET: 'mainnet',
+  TESTNET: 'testnet',
+  DEVNET: 'devnet'
+};
 
 export const useMultiChainWallet = () => {
   const { authenticated, user, login, logout } = usePrivy();
   const wallets = useWallets();
   const { mutate: disconnectSuiWallet } = useDisconnectWallet();
   const [currentChainId, setCurrentChainId] = useState<number | null>(null);
+  const [selectedEvmNetwork, setSelectedEvmNetwork] = useState<keyof typeof SUPPORTED_NETWORKS>('ARBITRUM_SEPOLIA');
+  const [selectedSuiNetwork, setSelectedSuiNetwork] = useState<keyof typeof SUI_NETWORKS>('TESTNET');
   const [isWrongChain, setIsWrongChain] = useState(false);
 
   // Get the first connected Sui wallet
@@ -51,7 +72,8 @@ export const useMultiChainWallet = () => {
           const chainId = await ethereum.request({ method: 'eth_chainId' });
           const chainIdNumber = parseInt(chainId as string, 16);
           setCurrentChainId(chainIdNumber);
-          setIsWrongChain(chainIdNumber !== ARBITRUM_CHAIN_ID);
+          const targetChainId = SUPPORTED_NETWORKS[selectedEvmNetwork].chainId;
+          setIsWrongChain(chainIdNumber !== targetChainId);
         } catch (error) {
           console.error('Failed to get chain ID:', error);
         }
@@ -71,7 +93,8 @@ export const useMultiChainWallet = () => {
         if (typeof chainId === 'string') {
           const chainIdNumber = parseInt(chainId, 16);
           setCurrentChainId(chainIdNumber);
-          setIsWrongChain(chainIdNumber !== ARBITRUM_CHAIN_ID);
+          const targetChainId = SUPPORTED_NETWORKS[selectedEvmNetwork].chainId;
+          setIsWrongChain(chainIdNumber !== targetChainId);
         }
       };
 
@@ -80,7 +103,7 @@ export const useMultiChainWallet = () => {
         ethereum.removeListener('chainChanged', handleChainChanged);
       };
     }
-  }, [authenticated]);
+  }, [authenticated, selectedEvmNetwork]);
 
   const getWalletInfo = (chain: 'evm' | 'sui') => {
     if (chain === 'evm') {
@@ -127,18 +150,21 @@ export const useMultiChainWallet = () => {
     }
   };
 
-  const switchToArbitrum = async () => {
+  const switchToNetwork = async (networkKey: keyof typeof SUPPORTED_NETWORKS) => {
     const ethereum = getEthereumProvider();
     if (!ethereum) {
       throw new Error('Ethereum provider not found');
     }
 
+    const network = SUPPORTED_NETWORKS[networkKey];
+    
     try {
-      // Try to switch to Arbitrum
+      // Try to switch to the network
       await ethereum.request({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId: `0x${ARBITRUM_CHAIN_ID.toString(16)}` }],
+        params: [{ chainId: `0x${network.chainId.toString(16)}` }],
       });
+      setSelectedEvmNetwork(networkKey);
     } catch (switchError: unknown) {
       // If the chain is not added, add it
       if ((switchError as { code?: number })?.code === 4902) {
@@ -147,28 +173,32 @@ export const useMultiChainWallet = () => {
             method: 'wallet_addEthereumChain',
             params: [
               {
-                chainId: `0x${ARBITRUM_CHAIN_ID.toString(16)}`,
-                chainName: 'Arbitrum One',
+                chainId: `0x${network.chainId.toString(16)}`,
+                chainName: network.name,
                 nativeCurrency: {
                   name: 'ETH',
                   symbol: 'ETH',
                   decimals: 18,
                 },
-                rpcUrls: ['https://arb1.arbitrum.io/rpc'],
-                blockExplorerUrls: ['https://arbiscan.io/'],
+                rpcUrls: [network.rpcUrl],
+                blockExplorerUrls: [network.explorerUrl],
               },
             ],
           });
+          setSelectedEvmNetwork(networkKey);
         } catch (addError) {
-          console.error('Failed to add Arbitrum network:', addError);
+          console.error(`Failed to add ${network.name} network:`, addError);
           throw addError;
         }
       } else {
-        console.error('Failed to switch to Arbitrum:', switchError);
+        console.error(`Failed to switch to ${network.name}:`, switchError);
         throw switchError;
       }
     }
   };
+
+  // Legacy function for backward compatibility
+  const switchToArbitrum = () => switchToNetwork('ARBITRUM_SEPOLIA');
 
   const isAnyWalletConnected = authenticated || suiConnected;
 
@@ -181,14 +211,19 @@ export const useMultiChainWallet = () => {
       disconnect: () => disconnectWallet('evm'),
       isWrongChain,
       currentChainId,
-      switchToArbitrum
+      switchToArbitrum,
+      switchToNetwork,
+      selectedNetwork: selectedEvmNetwork,
+      setSelectedNetwork: setSelectedEvmNetwork
     },
     suiWallet: {
       connected: suiConnected,
       address: suiAccount?.address,
       connect: () => connectWallet('sui'),
       disconnect: () => disconnectWallet('sui'),
-      wallet: suiWallet
+      wallet: suiWallet,
+      selectedNetwork: selectedSuiNetwork,
+      setSelectedNetwork: setSelectedSuiNetwork
     },
     // Available Sui wallets
     availableSuiWallets: wallets,
@@ -201,6 +236,13 @@ export const useMultiChainWallet = () => {
     isWrongChain,
     currentChainId,
     switchToArbitrum,
-    ARBITRUM_CHAIN_ID
+    switchToNetwork,
+    // Network configurations
+    SUPPORTED_NETWORKS,
+    SUI_NETWORKS,
+    selectedEvmNetwork,
+    selectedSuiNetwork,
+    setSelectedEvmNetwork,
+    setSelectedSuiNetwork
   };
 }; 

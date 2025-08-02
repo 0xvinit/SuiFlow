@@ -58,14 +58,15 @@ const SwapBox = ({
     isWrongChain,
     switchToArbitrum,
   } = useMultiChainWallet();
-  // Only fetch balance for SwapBox1
+  // Always call the hook, but only use the result for SwapBox1
   const {
-    balance,
+    balance: walletBalance,
     symbol: balanceSymbol,
     isLoading: balanceLoading,
-  } = boxNumber === 1
-    ? useWalletBalance(selectedToken)
-    : { balance: "0.0000", symbol: "ETH", isLoading: false };
+  } = useWalletBalance(selectedToken);
+  
+  // Only use real balance for SwapBox1
+  const balance = boxNumber === 1 ? walletBalance : "0.0000";
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [localInputValue, setLocalInputValue] = useState("");
   const [showWalletModal, setShowWalletModal] = useState(false);
