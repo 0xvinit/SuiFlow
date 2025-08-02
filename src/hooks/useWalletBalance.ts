@@ -12,16 +12,23 @@ interface BalanceInfo {
   error?: string;
 }
 
+// Type for Ethereum provider (from useMultiChainWallet)
+interface EthereumProvider {
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+}
+
 // Helper function to get balance for EVM chains
 const getEvmBalance = async (address: string, tokenAddress?: string): Promise<string> => {
   if (typeof window === 'undefined' || !window.ethereum) {
     throw new Error('Ethereum provider not found');
   }
 
+  const ethereum = window.ethereum as unknown as EthereumProvider;
+
   try {
     if (!tokenAddress) {
       // Get native token (ETH) balance
-      const balance = await (window.ethereum as any).request({
+      const balance = await ethereum.request({
         method: 'eth_getBalance',
         params: [address, 'latest'],
       }) as string;
@@ -40,11 +47,13 @@ const getEvmBalance = async (address: string, tokenAddress?: string): Promise<st
   }
 };
 
-// Helper function to get balance for Suicla
-const getSuiBalance = async (address: string): Promise<string> => {
+// Helper function to get balance for Sui
+const getSuiBalance = async (address: string, network: string = 'testnet'): Promise<string> => {
   try {
-    // Initialize Sui client
-    const client = new SuiClient({ url: getFullnodeUrl('mainnet') });
+    console.log(`🌐 Fetching Sui balance from ${network} for address:`, address);
+    
+    // Initialize Sui client with selected network
+    const client = new SuiClient({ url: getFullnodeUrl(network as 'mainnet' | 'testnet' | 'devnet') });
     
     // Get SUI balance
     const balance = await client.getBalance({
@@ -52,53 +61,89 @@ const getSuiBalance = async (address: string): Promise<string> => {
       coinType: '0x2::sui::SUI', // Native SUI token
     });
     
+    console.log(`💰 Raw Sui balance from ${network}:`, balance);
+    
     // Convert from MIST (smallest unit) to SUI
     // 1 SUI = 10^9 MIST
     const balanceInSui = parseInt(balance.totalBalance) / Math.pow(10, 9);
     
     return balanceInSui.toFixed(4);
   } catch (error) {
-    console.error('Failed to get Sui balance:', error);
+    console.error(`❌ Failed to get Sui balance from ${network}:`, error);
     
-    // Try testnet as fallback
-    try {
-      const testnetClient = new SuiClient({ url: getFullnodeUrl('testnet') });
-      const testnetBalance = await testnetClient.getBalance({
-        owner: address,
-        coinType: '0x2::sui::SUI',
-      });
-      
-      const balanceInSui = parseInt(testnetBalance.totalBalance) / Math.pow(10, 9);
-      return balanceInSui.toFixed(4);
-    } catch (testnetError) {
-      console.error('Failed to get Sui balance from testnet:', testnetError);
-      // Return 0 if both mainnet and testnet fail
-      return '0.0000';
+    // If it's not testnet, try testnet as fallback
+    if (network !== 'testnet') {
+      try {
+        console.log('🔄 Trying testnet as fallback...');
+        const testnetClient = new SuiClient({ url: getFullnodeUrl('testnet') });
+        const testnetBalance = await testnetClient.getBalance({
+          owner: address,
+          coinType: '0x2::sui::SUI',
+        });
+        
+        const balanceInSui = parseInt(testnetBalance.totalBalance) / Math.pow(10, 9);
+        console.log('✅ Testnet fallback balance:', balanceInSui);
+        return balanceInSui.toFixed(4);
+      } catch (testnetError) {
+        console.error('❌ Failed to get Sui balance from testnet fallback:', testnetError);
+      }
     }
+    
+    // Return 0 if all attempts fail
+    return '0.0000';
   }
 };
 
 export const useWalletBalance = (tokenSymbol?: string): BalanceInfo => {
-  const { evmWallet, suiWallet, isWrongChain } = useMultiChainWallet();
+  const { 
+    evmWallet, 
+    suiWallet, 
+    isWrongChain, 
+    selectedSuiNetwork,
+    selectedEvmNetwork 
+  } = useMultiChainWallet();
   const [balance, setBalance] = useState<string>('0.0000');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>();
 
+  // Extract values to avoid complex expressions in dependencies
+  const evmConnected = evmWallet.connected;
+  const evmAddress = evmWallet.address;
+  const suiConnected = suiWallet.connected;
+  const suiAddress = suiWallet.address;
+  const tokenSymbolValue = tokenSymbol || '';
+  const suiNetworkValue = selectedSuiNetwork || 'TESTNET';
+  const evmNetworkValue = selectedEvmNetwork || 'ARBITRUM_SEPOLIA';
+
   useEffect(() => {
     const fetchBalance = async () => {
+      console.log('🔄 Fetching balance...', { 
+        evmConnected: evmWallet.connected, 
+        evmAddress: evmWallet.address,
+        suiConnected: suiWallet.connected, 
+        suiAddress: suiWallet.address,
+        isWrongChain 
+      });
+      
       setIsLoading(true);
       setError(undefined);
 
       try {
-        if (evmWallet.connected && evmWallet.address && !isWrongChain) {
+        if (evmConnected && evmAddress && !isWrongChain) {
+          console.log('💰 Fetching EVM balance for:', evmAddress);
           // Get EVM balance
-          const evmBalance = await getEvmBalance(evmWallet.address);
+          const evmBalance = await getEvmBalance(evmAddress);
+          console.log('✅ EVM balance:', evmBalance);
           setBalance(evmBalance);
-        } else if (suiWallet.connected && suiWallet.address) {
-          // Get Sui balance
-          const suiBalance = await getSuiBalance(suiWallet.address);
+        } else if (suiConnected && suiAddress) {
+          console.log('💰 Fetching Sui balance for:', suiAddress, 'on network:', suiNetworkValue);
+          // Get Sui balance using selected network
+          const networkName = suiNetworkValue.toLowerCase();
+          const suiBalance = await getSuiBalance(suiAddress, networkName);
+          console.log('✅ Sui balance:', suiBalance);
           setBalance(suiBalance);
         } else {
+          console.log('❌ No wallet connected or wrong chain');
           setBalance('0.0000');
         }
       } catch (err) {
@@ -111,13 +156,22 @@ export const useWalletBalance = (tokenSymbol?: string): BalanceInfo => {
     };
 
     // Only fetch if we have a connected wallet
-    if ((evmWallet.connected && !isWrongChain) || suiWallet.connected) {
+    if ((evmConnected && !isWrongChain) || suiConnected) {
       fetchBalance();
     } else {
       setBalance('0.0000');
       setIsLoading(false);
     }
-  }, [evmWallet.connected, evmWallet.address, suiWallet.connected, suiWallet.address, isWrongChain, tokenSymbol]);
+  }, [
+    evmConnected, 
+    evmAddress, 
+    suiConnected, 
+    suiAddress, 
+    isWrongChain, 
+    tokenSymbolValue, 
+    suiNetworkValue,
+    evmNetworkValue
+  ]);
 
   // Determine the symbol based on connected wallet
   let symbol = 'ETH';

@@ -12,8 +12,20 @@ interface MultiChainConnectProps {
 export const MultiChainConnect: React.FC<MultiChainConnectProps> = ({
   className,
 }) => {
-  const { evmWallet, suiWallet, isAnyWalletConnected, isWrongChain, currentChainId, switchToArbitrum, ARBITRUM_CHAIN_ID } =
-    useMultiChainWallet();
+  const { 
+    evmWallet, 
+    suiWallet, 
+    isAnyWalletConnected, 
+    isWrongChain, 
+    currentChainId, 
+    switchToNetwork,
+    SUPPORTED_NETWORKS,
+    SUI_NETWORKS,
+    selectedEvmNetwork,
+    selectedSuiNetwork,
+    setSelectedEvmNetwork,
+    setSelectedSuiNetwork
+  } = useMultiChainWallet();
   const [showChainSelector, setShowChainSelector] = useState(false);
   const [showSuiWalletSelector, setShowSuiWalletSelector] = useState(false);
 
@@ -85,13 +97,6 @@ export const MultiChainConnect: React.FC<MultiChainConnectProps> = ({
     );
   };
 
-  const handleSwitchToArbitrum = async () => {
-    try {
-      await switchToArbitrum();
-    } catch (error) {
-      console.error('Failed to switch to Arbitrum:', error);
-    }
-  };
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -108,7 +113,7 @@ export const MultiChainConnect: React.FC<MultiChainConnectProps> = ({
   }, [showChainSelector, showSuiWalletSelector]);
 
   return (
-    <>
+    <React.Fragment key="multichain-connect">
     <div className={`relative ${className}`}>
       {!isAnyWalletConnected ? (
         <button
@@ -144,7 +149,7 @@ export const MultiChainConnect: React.FC<MultiChainConnectProps> = ({
                   className="px-6 py-1.5 rounded-full text-black bg-gradient-to-br from-[#fff] to-[#84d46c] shadow-inner shadow-[#84d46c]/30 transition cursor-pointer duration-300 hover:scale-105 hover:shadow-lg hover:shadow-[#84d46c]/50 uppercase w-fit text-[20px]"
                 >
                   <div className="flex items-center justify-between">
-                    <span>Arbitrum: {evmWallet.address?.slice(0, 6)}...{evmWallet.address?.slice(-4)}</span>
+                    <span>{SUPPORTED_NETWORKS[selectedEvmNetwork].name}: {evmWallet.address?.slice(0, 6)}...{evmWallet.address?.slice(-4)}</span>
                     <svg 
                       className={`w-4 h-4 ml-2 transition-transform duration-200 ${showEvmDropdown ? 'rotate-180' : ''}`}
                       fill="none" 
@@ -159,8 +164,8 @@ export const MultiChainConnect: React.FC<MultiChainConnectProps> = ({
               
               {showEvmDropdown && (
                 <div className="absolute top-full mt-2 right-0 bg-[#17191a] border border-[#84d46c]/30 rounded-lg shadow-xl z-50 min-w-[250px] overflow-hidden">
-                  {isWrongChain ? (
-                    <>
+                  {isWrongChain && (
+                    <React.Fragment key="wrong-chain-section">
                       <div className="px-4 py-3 text-red-400 font-vt323 text-sm tracking-wider border-b border-[#84d46c]/20 bg-red-900/20">
                         <div className="flex items-center space-x-2">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -169,12 +174,12 @@ export const MultiChainConnect: React.FC<MultiChainConnectProps> = ({
                           <span>Wrong Network Detected</span>
                         </div>
                         <div className="text-xs mt-1 text-gray-400">
-                          Current: Chain ID {currentChainId} | Required: Arbitrum ({ARBITRUM_CHAIN_ID})
+                          Current: Chain ID {currentChainId} | Required: {SUPPORTED_NETWORKS[selectedEvmNetwork].name} ({SUPPORTED_NETWORKS[selectedEvmNetwork].chainId})
                         </div>
                       </div>
                       <button
                         onClick={() => {
-                          handleSwitchToArbitrum();
+                          switchToNetwork(selectedEvmNetwork);
                           setShowEvmDropdown(false);
                         }}
                         className="w-full px-4 py-3 text-left text-white hover:bg-[#84d46c]/10 hover:text-[#84d46c] transition-colors font-vt323 text-lg tracking-wider flex items-center space-x-2 border-b border-[#84d46c]/20"
@@ -182,10 +187,39 @@ export const MultiChainConnect: React.FC<MultiChainConnectProps> = ({
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m0-4l-4-4" />
                         </svg>
-                        <span>Switch to Arbitrum</span>
+                        <span>Switch to {SUPPORTED_NETWORKS[selectedEvmNetwork].name}</span>
                       </button>
-                    </>
-                  ) : (
+                    </React.Fragment>
+                  )}
+                  
+                  {/* Network Selector */}
+                  <div className="px-4 py-2 border-b border-[#84d46c]/20">
+                    <div className="text-[#84d46c] font-vt323 text-sm tracking-wider mb-2">Select Network:</div>
+                    <div className="space-y-1">
+                      {Object.entries(SUPPORTED_NETWORKS).map(([key, network]) => (
+                        <button
+                          key={key}
+                          onClick={() => {
+                            setSelectedEvmNetwork(key as keyof typeof SUPPORTED_NETWORKS);
+                            if (evmWallet.connected) {
+                              switchToNetwork(key as keyof typeof SUPPORTED_NETWORKS);
+                            }
+                            setShowEvmDropdown(false);
+                          }}
+                          className={`w-full px-2 py-1 text-left rounded transition-colors font-vt323 text-sm flex items-center justify-between ${
+                            selectedEvmNetwork === key 
+                              ? 'bg-[#84d46c]/20 text-[#84d46c]' 
+                              : 'text-white hover:bg-[#84d46c]/10 hover:text-[#84d46c]'
+                          }`}
+                        >
+                          <span>{network.name}</span>
+                          {selectedEvmNetwork === key && <span>✓</span>}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {!isWrongChain && (
                     <button
                       onClick={() => handleSwitchChain("evm", "sui")}
                       className="w-full px-4 py-3 text-left text-white hover:bg-[#84d46c]/10 hover:text-[#84d46c] transition-colors font-vt323 text-lg tracking-wider flex items-center space-x-2 border-b border-[#84d46c]/20"
@@ -219,7 +253,7 @@ export const MultiChainConnect: React.FC<MultiChainConnectProps> = ({
                 className="px-6 py-1.5 rounded-full text-black bg-gradient-to-br from-[#fff] to-[#84d46c] shadow-inner shadow-[#84d46c]/30 transition cursor-pointer duration-300 hover:scale-105 hover:shadow-lg hover:shadow-[#84d46c]/50 uppercase w-fit text-[20px]"
               >
                 <div className="flex items-center justify-between">
-                  <span>Sui: {suiWallet.address?.slice(0, 6)}...{suiWallet.address?.slice(-4)}</span>
+                  <span>Sui {selectedSuiNetwork}: {suiWallet.address?.slice(0, 6)}...{suiWallet.address?.slice(-4)}</span>
                   <svg 
                     className={`w-4 h-4 ml-2 transition-transform duration-200 ${showSuiDropdown ? 'rotate-180' : ''}`}
                     fill="none" 
@@ -232,7 +266,31 @@ export const MultiChainConnect: React.FC<MultiChainConnectProps> = ({
               </div>
               
               {showSuiDropdown && (
-                <div className="absolute top-full mt-2 right-0 bg-[#17191a] border border-[#84d46c]/30 rounded-lg shadow-xl z-50 min-w-[200px] overflow-hidden">
+                <div className="absolute top-full mt-2 right-0 bg-[#17191a] border border-[#84d46c]/30 rounded-lg shadow-xl z-50 min-w-[220px] overflow-hidden">
+                  {/* Network Selector */}
+                  <div className="px-4 py-2 border-b border-[#84d46c]/20">
+                    <div className="text-[#84d46c] font-vt323 text-sm tracking-wider mb-2">Select Network:</div>
+                    <div className="space-y-1">
+                      {Object.entries(SUI_NETWORKS).map(([key]) => (
+                        <button
+                          key={key}
+                          onClick={() => {
+                            setSelectedSuiNetwork(key as keyof typeof SUI_NETWORKS);
+                            setShowSuiDropdown(false);
+                          }}
+                          className={`w-full px-2 py-1 text-left rounded transition-colors font-vt323 text-sm flex items-center justify-between ${
+                            selectedSuiNetwork === key 
+                              ? 'bg-[#84d46c]/20 text-[#84d46c]' 
+                              : 'text-white hover:bg-[#84d46c]/10 hover:text-[#84d46c]'
+                          }`}
+                        >
+                          <span>Sui {key.charAt(0) + key.slice(1).toLowerCase()}</span>
+                          {selectedSuiNetwork === key && <span>✓</span>}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
                   <button
                     onClick={() => handleSwitchChain("sui", "evm")}
                     className="w-full px-4 py-3 text-left text-white hover:bg-[#84d46c]/10 hover:text-[#84d46c] transition-colors font-vt323 text-lg tracking-wider flex items-center space-x-2 border-b border-[#84d46c]/20"
@@ -339,6 +397,6 @@ export const MultiChainConnect: React.FC<MultiChainConnectProps> = ({
           </div>
         </div>
       )}
-    </>
+    </React.Fragment>
   );
 };
