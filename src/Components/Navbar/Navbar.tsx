@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import ConnectWallet from "@/Components/ConnectWallet/connectwallet";
+import { MultiChainConnect } from "@/Components/ConnectWallet/MultiChainConnect";
 
 const Navbar = () => {
   return (
@@ -15,7 +15,7 @@ const Navbar = () => {
       </div>
 
       {/* Connect Wallet and Chain Selector */}
-      <ConnectWallet />
+      <MultiChainConnect />
     </nav>
   );
 };
