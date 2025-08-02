@@ -1,0 +1,9 @@
+{
+  "arbSepolia": {
+    "chainId": 421614,
+    "name": "Arbitrum Sepolia",
+    "limitOrderProtocol": "0xCaA83095c4E90F52c2B094470fb0f8497b39EEF9",
+    "escrowFactory": "0x56a7894dbbB2505Fc4A16c77f12D2e242e02bBe5",
+    "resolver": "0x22a607F84C78F285B6283516be88a29fbA9C2593"
+  }
+}
