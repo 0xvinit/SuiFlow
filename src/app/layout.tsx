@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Providers from "@/providers/PrivyWrapper";
+import { MultiChainProvider } from "@/providers/MultiChainProvider";
 import Navbar from "@/Components/Navbar/Navbar";
 import Head from "next/head";
 import { Pixelify_Sans, VT323 } from 'next/font/google'
@@ -64,10 +64,9 @@ export default function RootLayout({
       <body
       className={`${pixelify.variable} ${vt323.variable} antialiased`}
       >
-        <Providers>
-          
+        <MultiChainProvider>
           {children}
-        </Providers>
+        </MultiChainProvider>
       </body>
     </html>
   );

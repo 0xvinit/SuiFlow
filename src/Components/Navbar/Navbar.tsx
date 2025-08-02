@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React from 'react';
-import ConnectWallet from '@/Components/ConnectWallet/connectwallet';
+import React from "react";
+import { MultiChainConnect } from "@/Components/ConnectWallet/MultiChainConnect";
 
 const Navbar = () => {
   return (
@@ -12,8 +12,8 @@ const Navbar = () => {
         <span className="font-extrabold text-[#84d46c] text-[35px] lg:text-[40px] xl:text-[50px] font-pixelify tracking-wider leading-[50px]">Suiflow</span>
       </div>
 
-      {/* Connect Wallet Button */}
-      <ConnectWallet />
+      {/* Connect Wallet and Chain Selector */}
+      <MultiChainConnect />
     </nav>
   );
 };
