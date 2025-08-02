@@ -1,7 +1,21 @@
 import React, { useState } from 'react';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 
-const SwappingDetails = () => {
+interface SwappingDetailsProps {
+  convertedValue?: string;
+  selectedToken2?: string;
+  isLoading?: boolean;
+  inputValue1?: string;
+  selectedToken1?: string;
+}
+
+const SwappingDetails = ({ 
+  convertedValue = "0", 
+  selectedToken2 = "Token", 
+  isLoading = false,
+  inputValue1 = "0",
+  selectedToken1 = "Token"
+}: SwappingDetailsProps) => {
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
 
@@ -41,14 +55,30 @@ const SwappingDetails = () => {
           <div className="text-white/60">Network Fee</div>
           <div className="text-right text-white/90">--</div>
 
-          <div className="text-white/60">You’ll Receive</div>
-          <div className="text-right text-white/90">98.5 USDC</div>
+          <div className="text-white/60">You&apos;ll Receive</div>
+          <div className="text-right text-white/90">
+            {isLoading ? (
+              <span className="text-gray-400">Calculating...</span>
+            ) : convertedValue && parseFloat(convertedValue) > 0 ? (
+              `${convertedValue} ${selectedToken2}`
+            ) : (
+              <span className="text-gray-400">--</span>
+            )}
+          </div>
+
+          <div className="text-white/60">Exchange Rate</div>
+          <div className="text-right text-white/90">
+            {isLoading ? (
+              <span className="text-gray-400">--</span>
+            ) : convertedValue && inputValue1 && parseFloat(inputValue1) > 0 && parseFloat(convertedValue) > 0 ? (
+              `1 ${selectedToken1} = ${(parseFloat(convertedValue) / parseFloat(inputValue1)).toFixed(6)} ${selectedToken2}`
+            ) : (
+              <span className="text-gray-400">--</span>
+            )}
+          </div>
 
           <div className="text-white/60">Estimated Time</div>
           <div className="text-right text-white/90">~1 min</div>
-
-          <div className="text-white/60">Price Impact</div>
-          <div className="text-right text-white/90">0.23%</div>
         </div>
       </div>
 

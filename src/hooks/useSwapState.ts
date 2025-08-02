@@ -10,22 +10,33 @@ export const useSwapState = () => {
   const [inputValue1, setInputValue1] = useState<string>("");
 
   const selectChain = (chain: ChainKey, box: 1 | 2) => {
+    // Find the first enabled token for the selected chain
+    const firstEnabledToken = tokensByChain[chain].find(token => token.enabled);
+    const defaultTokenName = firstEnabledToken ? firstEnabledToken.name : tokensByChain[chain][0].name;
+    
     if (box === 1) {
       setSelectedChain1(chain);
-      // Reset token to first available token for the new chain
-      setSelectedToken1(tokensByChain[chain][0].name);
+      // Reset token to first enabled token for the new chain
+      setSelectedToken1(defaultTokenName);
     } else {
       setSelectedChain2(chain);
-      // Reset token to first available token for the new chain
-      setSelectedToken2(tokensByChain[chain][0].name);
+      // Reset token to first enabled token for the new chain
+      setSelectedToken2(defaultTokenName);
     }
   };
 
   const selectToken = (tokenName: string, box: 1 | 2) => {
-    if (box === 1) {
-      setSelectedToken1(tokenName);
-    } else {
-      setSelectedToken2(tokenName);
+    // Check if the token is enabled before selecting
+    const currentChain = box === 1 ? selectedChain1 : selectedChain2;
+    if (currentChain) {
+      const token = tokensByChain[currentChain].find(t => t.name === tokenName);
+      if (token && token.enabled) {
+        if (box === 1) {
+          setSelectedToken1(tokenName);
+        } else {
+          setSelectedToken2(tokenName);
+        }
+      }
     }
   };
 

@@ -182,7 +182,13 @@ const SwapPage = () => {
           )}
         </div>
         <div className="mt-16 mb-28">
-          <SwappingDetails />
+          <SwappingDetails 
+            convertedValue={convertedValue}
+            selectedToken2={selectedToken2}
+            isLoading={isLoading}
+            inputValue1={inputValue1}
+            selectedToken1={selectedToken1}
+          />
         </div>
       </div>
     </>

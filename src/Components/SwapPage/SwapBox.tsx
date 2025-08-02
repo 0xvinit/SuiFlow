@@ -253,9 +253,13 @@ const SwapBox = ({
   }, [evmWallet.connected, suiWallet.connected, isWrongChain, selectedChain, onChainSelect, boxNumber]);
 
   const handleTokenSelect = (tokenName: string) => {
-    onTokenSelect(tokenName, boxNumber);
-    // Close dropdown after selecting token
-    setDropdownOpen(false);
+    // Check if the token is enabled before selecting
+    const token = selectedChain ? tokensByChain[selectedChain].find(t => t.name === tokenName) : null;
+    if (token && token.enabled) {
+      onTokenSelect(tokenName, boxNumber);
+      // Close dropdown after selecting token
+      setDropdownOpen(false);
+    }
   };
 
   useEffect(() => {
@@ -423,11 +427,13 @@ const SwapBox = ({
                             {tokensByChain[selectedChain].map((token) => (
                               <div
                                 key={token.name}
-                                onClick={() => handleTokenSelect(token.name)}
-                                className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition ${
-                                  selectedToken === token.name
-                                    ? "bg-[#84d46c]/10 border border-[#84d46c]/50"
-                                    : "hover:bg-[#84d46c]/10 hover:border hover:border-[#84d46c]/30"
+                                onClick={() => token.enabled && handleTokenSelect(token.name)}
+                                className={`flex items-center gap-3 p-2 rounded-lg transition relative ${
+                                  !token.enabled
+                                    ? "opacity-50 cursor-not-allowed bg-gray-800/30"
+                                    : selectedToken === token.name
+                                    ? "bg-[#84d46c]/10 border border-[#84d46c]/50 cursor-pointer"
+                                    : "hover:bg-[#84d46c]/10 hover:border hover:border-[#84d46c]/30 cursor-pointer"
                                 }`}
                               >
                                 <Image
@@ -438,6 +444,11 @@ const SwapBox = ({
                                 <span className="text-white/90 text-[20px]">
                                   {token.name}
                                 </span>
+                                {!token.enabled && (
+                                  <span className="text-xs text-gray-400 ml-auto">
+                                    Coming Soon
+                                  </span>
+                                )}
                               </div>
                             ))}
                           </div>
