@@ -24,6 +24,10 @@ interface SwapBoxProps {
   onWalletAddressChange?: (address: string) => void;
   walletInputValue?: string;
   isAnimating?: boolean;
+  convertedValue?: string;
+  inputValue?: string;
+  onInputChange?: (value: string) => void;
+  // isLoading?: boolean;
 }
 
 const SwapBox = ({
@@ -41,14 +45,27 @@ const SwapBox = ({
   walletAddress,
   onWalletAddressChange,
   walletInputValue,
+  convertedValue,
+  inputValue: externalInputValue,
+  onInputChange,
 }: SwapBoxProps) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [inputValue, setInputValue] = useState("");
+  const [localInputValue, setLocalInputValue] = useState("");
+
+  // Use external input value if provided, otherwise use local state
+  const inputValue =
+    externalInputValue !== undefined ? externalInputValue : localInputValue;
+  const setInputValue = onInputChange || setLocalInputValue;
+
   const balance = 3; // replace with actual balance from props or context
   const hasInsufficientBalance = Number(inputValue) > balance;
 
   // Use token USD value hook
   const { usdValue, isLoading } = useTokenUSDValue(selectedToken, inputValue);
+  const { usdValue: usdValue2, isLoading: isLoading2 } = useTokenUSDValue(
+    selectedToken,
+    convertedValue || "0"
+  );
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
@@ -283,13 +300,17 @@ const SwapBox = ({
                   ) : (
                     <div className="w-6 h-6 bg-gray-600 aspect-square rounded-full" />
                   )}
-                  <span className="text-[22px] text-white">- -</span>
+                  <span className="text-[22px] text-white">
+                    {convertedValue}
+                  </span>
                 </div>
 
                 {/* USD Value */}
                 <div className="text-right">
                   {/* <div className="text-white/80 text-sm">{selectedToken || 'Token'}</div> */}
-                  <div className="text-white/50 text-lg">${"250.00"}</div>
+                  <div className="text-white/50 text-lg">
+                    {isLoading2 ? "Loading..." : `~$${usdValue2.toFixed(2)}`}
+                  </div>
                 </div>
               </div>
             )}
