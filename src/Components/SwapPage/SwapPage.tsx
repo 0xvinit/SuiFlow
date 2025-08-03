@@ -13,6 +13,8 @@ import SwappingDetails from "./SwappingDetails";
 import Heading from "./Heading";
 import { getCurrentToken } from "@/utils/swapUtils";
 import { useTokenToTokenConversion } from "@/hooks/useTokenToTokenConversion";
+import Steps from "./Steps";
+import PoweredBy1inch from "./PoweredBy1inch";
 
 const SwapPage = () => {
 
@@ -175,7 +177,10 @@ const SwapPage = () => {
             </motion.div>
           )}
         </div>
-        <div className="mt-16 mb-28">
+        <div className="mt-16">
+          <Steps/>
+        </div>
+        <div className="mt-16 mb-12">
           <SwappingDetails 
             convertedValue={convertedValue}
             selectedToken2={selectedToken2}
@@ -184,6 +189,9 @@ const SwapPage = () => {
             selectedToken1={selectedToken1}
           />
         </div>
+        
+        <PoweredBy1inch />
+        
       </div>
     </>
   );
