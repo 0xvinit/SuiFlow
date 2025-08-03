@@ -58,8 +58,14 @@ const SwappingDetails: React.FC<SwappingDetailsProps> = ({
   
   console.log('🔍 ETH Wallet Found:', { ethWallet, ethConnected });
   
-  // Sui wallet (still using useMultiChainWallet for Sui)
-  const { account: suiAccount } = useMultiChainWallet();
+  // Sui wallet (using useMultiChainWallet for both EVM and Sui)
+  const { account: suiAccount, suiWallet: suiWalletInfo } = useMultiChainWallet();
+  
+  console.log('🔍 SUI Wallet Status:', { 
+    suiWalletInfo, 
+    suiAccount, 
+    suiConnected: suiWalletInfo.connected && !!suiAccount?.address 
+  });
   
   // Swap functionality
   const {
@@ -81,7 +87,8 @@ const SwappingDetails: React.FC<SwappingDetailsProps> = ({
                      selectedChain1 === "sui" && selectedChain2 === "arbitrum";
 
   // Check source wallet connection based on swap direction
-  const sourceWalletConnected = isEthToSui ? ethConnected : (isSuiToEth ? suiAccount?.address : false);
+  const suiConnected = suiWalletInfo.connected && !!suiAccount?.address;
+  const sourceWalletConnected = isEthToSui ? ethConnected : (isSuiToEth ? suiConnected : false);
   const isLoading = swapLoading
 
   // Validate destination address format
@@ -186,6 +193,7 @@ const SwappingDetails: React.FC<SwappingDetailsProps> = ({
       sourceWalletConnected,
       isEthToSui,
       ethConnected,
+      suiConnected,
       suiAccount: !!suiAccount?.address,
       isValidDestinationAddress,
       isConfirmed,

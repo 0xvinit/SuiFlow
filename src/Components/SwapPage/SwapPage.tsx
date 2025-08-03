@@ -188,6 +188,7 @@ const SwapPage = () => {
             selectedToken2={selectedToken2}
             selectedChain1={selectedChain1}
             selectedChain2={selectedChain2}
+            destinationAddress={walletInputValue}
           />
         </div>
       </div>
