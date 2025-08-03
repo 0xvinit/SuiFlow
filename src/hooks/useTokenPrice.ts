@@ -5,6 +5,7 @@ import Sui from "@/assets/Images/sui.png";
 import arb from "@/assets/Images/arbone.svg";
 import usdt from "@/assets/Images/usdt.svg";
 import usdc from "@/assets/Images/usdc.svg";
+import { StaticImageData } from "next/image";
 
 // Cache for storing price data with timestamps
 interface PriceCache {
@@ -16,7 +17,7 @@ interface PriceCache {
 
 interface TokenWithPrice {
   name: string;
-  icon: string | any;
+  icon: string | StaticImageData;
   color: string;
   chain: number;
   address: string;

@@ -9,18 +9,12 @@ import SwapBox from "./SwapBox";
 import SwapArrow from "./SwapArrow";
 import { chains, tokensByChain } from "@/data/swapData";
 import { useSwapState } from "@/hooks/useSwapState";
-import { useLogin, usePrivy } from "@privy-io/react-auth";
 import SwappingDetails from "./SwappingDetails";
 import Heading from "./Heading";
 import { getCurrentToken } from "@/utils/swapUtils";
 import { useTokenToTokenConversion } from "@/hooks/useTokenToTokenConversion";
-import { useMultiChainWallet } from "@/hooks/useMultiChainWallet";
-import { MultiChainConnect } from "../ConnectWallet/MultiChainConnect";
 
 const SwapPage = () => {
-  const { login } = useLogin();
-  const { authenticated, user } = usePrivy();
-  const { evmWallet, suiWallet, isAnyWalletConnected, isWrongChain } = useMultiChainWallet();
 
   const [walletInputValue, setWalletInputValue] = useState("");
   const [isArrowAnimating, setIsArrowAnimating] = useState(false);

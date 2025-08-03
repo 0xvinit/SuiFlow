@@ -8,7 +8,6 @@ import { useTokenUSDValue } from "@/hooks/useTokenPrice";
 import { useMultiChainWallet } from "@/hooks/useMultiChainWallet";
 import { useWalletBalance } from "@/hooks/useWalletBalance";
 import { useAddressBalance } from "@/hooks/useAddressBalance";
-import { MultiChainConnect } from "../ConnectWallet/MultiChainConnect";
 
 interface SwapBoxProps {
   boxNumber: 1 | 2;
@@ -44,8 +43,6 @@ const SwapBox = ({
   isChainDisabled,
   defaultChainIcon,
   defaultTokenIcon,
-  isWalletConnected,
-  walletAddress,
   onWalletAddressChange,
   walletInputValue,
   convertedValue,
@@ -255,6 +252,7 @@ const SwapBox = ({
     showWalletModal,
     onChainSelect,
     boxNumber,
+    getChainWalletStatus
   ]);
 
   // Sync selected chain with connected wallet

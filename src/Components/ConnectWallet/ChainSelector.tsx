@@ -179,7 +179,7 @@ export default function ChainSelector({ isConnected }: ChainSelectorProps) {
 
         try {
           // Try to access the wallet's provider through window.ethereum
-          const ethereum = (window as any)?.ethereum;
+          const ethereum = (window as unknown as { ethereum?: { request?: (...args: unknown[]) => Promise<unknown> } })?.ethereum;
           if (ethereum && typeof ethereum.request === "function") {
             await ethereum.request({
               method: "wallet_switchEthereumChain",
@@ -193,10 +193,10 @@ export default function ChainSelector({ isConnected }: ChainSelectorProps) {
           }
         } catch (switchError: unknown) {
           // If chain is not added to wallet, add it
-          if ((switchError as any)?.code === 4902) {
+          if ((switchError as { code?: number })?.code === 4902) {
             try {
-              const ethereum = (window as any)?.ethereum;
-              if (ethereum) {
+              const ethereum = (window as unknown as { ethereum?: { request?: (...args: unknown[]) => Promise<unknown> } })?.ethereum;
+              if (ethereum && typeof ethereum.request === "function") {
                 await ethereum.request({
                   method: "wallet_addEthereumChain",
                   params: [

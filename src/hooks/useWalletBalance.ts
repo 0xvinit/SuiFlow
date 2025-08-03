@@ -175,7 +175,11 @@ export const useWalletBalance = (tokenSymbol?: string): BalanceInfo => {
     isWrongChain, 
     tokenSymbolValue, 
     suiNetworkValue,
-    evmNetworkValue
+    evmNetworkValue,
+    evmWallet.connected,
+    suiWallet.connected,
+    suiWallet.address,
+    evmWallet.address,
   ]);
 
   // Determine the symbol based on connected wallet

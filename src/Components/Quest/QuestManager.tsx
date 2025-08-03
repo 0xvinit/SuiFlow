@@ -11,7 +11,6 @@ interface QuestManagerProps {
 }
 
 const QuestManager: React.FC<QuestManagerProps> = ({ className = "" }) => {
-  const [showQuestBanner, setShowQuestBanner] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);
   const [hasTriggeredConfetti, setHasTriggeredConfetti] = useState(false);
   const { activeQuest, discoveredQuests, closeQuest, getQuest, questsData } = useQuestContext();

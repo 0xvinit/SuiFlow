@@ -11,6 +11,10 @@ interface SuiWalletSelectorProps {
   onWalletSelect: (walletName: string) => void;
   onClose: () => void;
 }
+interface WalletConfig {
+  name: string;
+  alternativeNames?: string[];
+}
 // Define available Sui wallets with their installation links
 const SUI_WALLETS = [
   {
@@ -54,7 +58,6 @@ const SUI_WALLETS = [
 export const SuiWalletSelector: React.FC<SuiWalletSelectorProps> = ({ onWalletSelect, onClose }) => {
   const wallets = useWallets();
   const { mutate: connect } = useConnectWallet();
-  const { currentWallet } = useCurrentWallet();
   const [selectedWallet, setSelectedWallet] = useState<string>('');
   const [connecting, setConnecting] = useState<string>('');
 
@@ -105,21 +108,21 @@ export const SuiWalletSelector: React.FC<SuiWalletSelectorProps> = ({ onWalletSe
   
   // Debug: Log detected wallet names
   console.log('Detected wallets:', wallets.map(w => ({ name: w.name, accounts: w.accounts.length })));
-  
+
   // Helper function to check if a wallet is available (including alternative names)
-  const isWalletAvailable = (walletConfig: any) => {
+  const isWalletAvailable = (walletConfig: WalletConfig) => {
     return availableWalletNames.includes(walletConfig.name) || 
            walletConfig.alternativeNames?.some((altName: string) => availableWalletNames.includes(altName));
   };
   
   // Helper function to check if a wallet is connected (including alternative names)
-  const isWalletConnected = (walletConfig: any) => {
+  const isWalletConnected = (walletConfig: WalletConfig) => {
     return connectedWalletNames.includes(walletConfig.name) || 
            walletConfig.alternativeNames?.some((altName: string) => connectedWalletNames.includes(altName));
   };
   
   // Helper function to get the actual wallet object from detected wallets
-  const getActualWallet = (walletConfig: any) => {
+  const getActualWallet = (walletConfig: WalletConfig) => {
     return wallets.find(w => 
       w.name === walletConfig.name || 
       walletConfig.alternativeNames?.includes(w.name)

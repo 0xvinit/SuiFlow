@@ -120,7 +120,7 @@ const QuestConfetti: React.FC<QuestConfettiProps> = ({ isActive, onClose }) => {
                 className="text-white font-vt323 text-lg mb-4 leading-relaxed"
               >
                 🎉 Congratulations! 🎉<br/>
-                You've discovered all the secrets of<br/>
+                You&apos;ve discovered all the secrets of<br/>
                 <span className="text-[#84d46c] font-bold">Cross-Chain Swaps!</span>
               </motion.p>
 
