@@ -86,18 +86,18 @@ export const SuiWalletSelector: React.FC<SuiWalletSelectorProps> = ({ onWalletSe
               onError: (error) => {
                 console.error('Failed to connect to wallet:', error);
                 setConnecting('');
-                alert(`Failed to connect to ${selectedWallet}. Please make sure your wallet is unlocked and try again.`);
+                // alert(`Failed to connect to ${selectedWallet}. Please make sure your wallet is unlocked and try again.`);
               }
             }
           );
         } else {
           setConnecting('');
-          alert(`Wallet ${selectedWallet} not found. Please make sure it's installed and try again.`);
+          // alert(`Wallet ${selectedWallet} not found. Please make sure it's installed and try again.`);
         }
       } catch (error) {
         console.error('Connection error:', error);
         setConnecting('');
-        alert(`Failed to connect to ${selectedWallet}. Please try again.`);
+        // alert(`Failed to connect to ${selectedWallet}. Please try again.`);
       }
     }
   };

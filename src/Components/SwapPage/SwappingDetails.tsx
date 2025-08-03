@@ -81,22 +81,22 @@ const SwappingDetails: React.FC<SwappingDetailsProps> = ({
   // Handle swap button click
   const handleSwap = async () => {
     if (!sourceWalletConnected) {
-      alert(`Please connect your ${isEthToSui ? 'Ethereum' : 'Sui'} wallet (source chain)`)
+      // alert(`Please connect your ${isEthToSui ? 'Ethereum' : 'Sui'} wallet (source chain)`)
       return
     }
 
     if (!isValidDestinationAddress) {
-      alert('Please provide a valid destination address')
+      // alert('Please provide a valid destination address')
       return
     }
 
     if (!isConfirmed) {
-      alert('Please confirm the swap details first');
+      // alert('Please confirm the swap details first');
       return;
     }
 
     if (!ethAmount || parseFloat(ethAmount) <= 0) {
-      alert('Please enter a valid amount');
+      // alert('Please enter a valid amount');
       return;
     }
 
@@ -114,10 +114,10 @@ const SwappingDetails: React.FC<SwappingDetailsProps> = ({
         if (result.success) {
           console.log('✅ ETH → SUI swap completed successfully!');
           console.log('📋 Transaction details:', result);
-          alert(`Swap successful! Transaction: ${result.ethTxHash}`);
+          // alert(`Swap successful! Transaction: ${result.ethTxHash}`);
         } else {
           console.error('❌ ETH → SUI swap failed:', result.error);
-          alert(`Swap failed: ${result.error}`);
+          // alert(`Swap failed: ${result.error}`);
         }
       } else if (isSuiToEth) {
         console.log('🚀 Starting SUI → ETH swap...');
@@ -130,10 +130,10 @@ const SwappingDetails: React.FC<SwappingDetailsProps> = ({
         if (result.success) {
           console.log('✅ SUI → ETH swap completed successfully!');
           console.log('📋 Transaction details:', result);
-          alert(`Swap successful! Transaction: ${result.suiTxHash}`);
+          // alert(`Swap successful! Transaction: ${result.suiTxHash}`);
         } else {
           console.error('❌ SUI → ETH swap failed:', result.error);
-          alert(`Swap failed: ${result.error}`);
+          // alert(`Swap failed: ${result.error}`);
         }
       } else {
         alert('Unsupported swap direction. Please select ETH↔SUI for cross-chain swaps.');

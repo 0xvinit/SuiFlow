@@ -92,9 +92,9 @@ export const MultiChainConnect: React.FC<MultiChainConnectProps> = ({
   const handleSuiWalletSelect = (walletName: string) => {
     console.log("Selected Sui wallet:", walletName);
     setShowSuiWalletSelector(false);
-    alert(
-      `Successfully connected to ${walletName}! Check the debug panel to see the connection status.`
-    );
+    // alert(
+    //   `Successfully connected to ${walletName}! Check the debug panel to see the connection status.`
+    // );
   };
 
 

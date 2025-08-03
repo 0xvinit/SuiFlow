@@ -13,11 +13,12 @@ import SwappingDetails from "./SwappingDetails";
 import Heading from "./Heading";
 import { getCurrentToken } from "@/utils/swapUtils";
 import { useTokenToTokenConversion } from "@/hooks/useTokenToTokenConversion";
-import Steps from "./Steps";
+// import SwapProgressTracker from "./SwapProgressTracker";
+// import SwapProgressBar from "./SwapProgressBar";
 import PoweredBy1inch from "./PoweredBy1inch";
+import { useCompleteSwap } from "@/hooks/useSwap";
 
 const SwapPage = () => {
-
   const [walletInputValue, setWalletInputValue] = useState("");
   const [isArrowAnimating, setIsArrowAnimating] = useState(false);
 
@@ -32,6 +33,9 @@ const SwapPage = () => {
     setInputValue,
     isChainDisabled,
   } = useSwapState();
+
+  // Get swap progress data from useSwap hook
+  const { isLoading:isLoading2, logs, showTransactionHistory } = useCompleteSwap();
 
   // Get token icons for animation
   const token1Data = getCurrentToken(selectedChain1, selectedToken1);
@@ -177,11 +181,15 @@ const SwapPage = () => {
             </motion.div>
           )}
         </div>
-        <div className="mt-16">
-          <Steps/>
-        </div>
+        
+        {/* Swap Progress Bar */}
+        {/* <SwapProgressBar 
+          logs={logs}
+          isLoading={isLoading2}
+          showTransactionHistory={showTransactionHistory}
+        /> */}
         <div className="mt-16 mb-12">
-          <SwappingDetails 
+          <SwappingDetails
             ethAmount={inputValue1}
             selectedToken1={selectedToken1}
             selectedToken2={selectedToken2}
@@ -190,9 +198,8 @@ const SwapPage = () => {
             destinationAddress={walletInputValue}
           />
         </div>
-        
+
         <PoweredBy1inch />
-        
       </div>
     </>
   );

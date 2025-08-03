@@ -1340,7 +1340,7 @@ export function useCompleteSwap() {
       return hash
       
     } catch (gasError) {
-      addLog(`❌ Gas estimation failed: ${gasError instanceof Error ? gasError.message : 'Unknown error'}`)
+      addLog(`Gas estimation failed: ${gasError instanceof Error ? gasError.message : 'Unknown error'}`)
       addLog(`🔄 Trying with default gas limit...`)
       
       // Fallback to default gas if estimation fails
