@@ -90,3 +90,9 @@ body {
 .mondwest {
   font-family: "PP Mondwest", system-ui;
 }
+
+
+.confetti-custom {
+  z-index: 50 !important; /* Ensure it's on top of other elements */
+  position: absolute;
+}

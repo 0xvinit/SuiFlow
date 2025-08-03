@@ -1,10 +1,9 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import SwapPage from "@/Components/SwapPage/SwapPage";
 import Footer from "@/Components/SwapPage/Footer";
 import "../Styles/fonts.module.css";
-import styles from "@/Styles/gradientAnimations.module.css";
 import Navbar from "@/Components/Navbar/Navbar";
 import QuestManager from "@/Components/Quest/QuestManager";
 

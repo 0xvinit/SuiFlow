@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { MultiChainProvider } from "@/providers/MultiChainProvider";
 import { QuestProvider } from "@/contexts/QuestContext";
-import Navbar from "@/Components/Navbar/Navbar";
 import Head from "next/head";
 import { Pixelify_Sans, VT323 } from 'next/font/google'
 const pixelify = Pixelify_Sans

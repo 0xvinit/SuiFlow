@@ -342,16 +342,7 @@ const SwappingDetails: React.FC<SwappingDetailsProps> = ({
         )}
       </div>
 
-      {/* Test Wallet Connection Button */}
-      <div className="px-4 pb-2">
-        <button 
-          className="w-full py-2 rounded bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm transition-colors duration-200"
-          onClick={testWalletConnection}
-          disabled={isLoading}
-        >
-          Test Wallet Connection
-        </button>
-      </div>
+      
 
       {/* Clear Logs Button */}
       {logs.length > 0 && (

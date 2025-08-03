@@ -13,7 +13,7 @@ interface SwapArrowProps {
 
 const SwapArrow = ({ isAnimating = false }: SwapArrowProps) => {
   return (
-    <div className="bg-black border border-white/20 rounded-full mx-8 relative w-16 h-16 flex flex-col items-center justify-center -translate-y-10">
+    <div className="bg-black border border-white/20 rounded-full mx-4 xl:mx-8 relative w-16 h-16 flex flex-col items-center justify-center -translate-y-10">
       <IoIosArrowRoundForward className="size-12 text-white" />
 
       {/* Glow effect during animation */}

@@ -21,13 +21,8 @@ function getEnvVar(name: string, fallback?: string): string {
   ];
   
   for (const pattern of patterns) {
-    if (typeof window !== 'undefined') {
-      // Client side: try import.meta.env and process.env
-      value = (import.meta.env as any)?.[pattern] || (process.env as any)?.[pattern] || '';
-    } else {
-      // Server side: try process.env
-      value = (process.env as any)?.[pattern] || '';
-    }
+    // Next.js environment: use process.env for both client and server
+    value = (process.env as Record<string, string>)?.[pattern] || '';
     
     if (value) {
       console.log(`✅ Resolver found env var ${pattern}: ${value.slice(0, 10)}...`);
@@ -69,6 +64,9 @@ function createSuiResolverKeypairs() {
     
     
     // Use Sui SDK's built-in decodeSuiPrivateKey function
+    if (!SUI_RESOLVER2_PRIVATE_KEY || !SUI_RESOLVER3_PRIVATE_KEY) {
+      throw new Error('Missing Sui resolver private keys in environment variables')
+    }
     const decodedKey2 = decodeSuiPrivateKey(SUI_RESOLVER2_PRIVATE_KEY)
     const decodedKey3 = decodeSuiPrivateKey(SUI_RESOLVER3_PRIVATE_KEY)
     
@@ -324,7 +322,7 @@ export class ResolverService {
       console.log("🔍 Raw coins response:", JSON.stringify(coins, null, 2))
       console.log("🔍 Coins data array length:", coins.data.length)
       console.log("🔍 Individual coin details:")
-      coins.data.forEach((coin, index) => {
+      coins.data.forEach((coin: any, index: number) => {
         console.log(`  Coin ${index}:`, {
           coinObjectId: coin.coinObjectId,
           balance: coin.balance,
@@ -395,7 +393,7 @@ export class ResolverService {
           coinType: '0x2::sui::SUI'
         })
         
-        const balance = coins.data.reduce((total, coin) => total + BigInt(coin.balance), BigInt(0))
+        const balance = coins.data.reduce((total: bigint, coin: any) => total + BigInt(coin.balance), BigInt(0))
         this.addLog(`💰 Balance after faucet: ${Number(balance) / 1e9} SUI`)
         
         return // Success, exit retry loop
@@ -562,7 +560,7 @@ export class ResolverService {
       
       // Debug: Log all object changes
       this.addLog(`🔍 Object changes found: ${result.objectChanges?.length || 0}`)
-      result.objectChanges?.forEach((change, index) => {
+      result.objectChanges?.forEach((change: any, index: number) => {
         this.addLog(`  Change ${index}: ${change.type}`)
         if (change.type === 'created') {
           this.addLog(`    - Object ID: ${change.objectId}`)
@@ -579,11 +577,11 @@ export class ResolverService {
       }
       
       // Get escrow ID from object changes - look for created shared objects
-      const createdObjects = result.objectChanges?.filter(change => change.type === 'created')
+      const createdObjects = result.objectChanges?.filter((change:any) => change.type === 'created')
       
       if (createdObjects && createdObjects.length > 0) {
         // Look for the vault object (it should be shared)
-        const vaultObject = createdObjects.find(change => 
+        const vaultObject = createdObjects.find((change:any) => 
           change.type === 'created' && 
           (change.objectType?.includes('AtomicSwapVault') || 
            change.objectType?.includes('vault') ||
@@ -628,7 +626,7 @@ export class ResolverService {
   }
 
   // Create Ethereum source escrow with resolver using resolver contract
-  async createEthEscrowWithResolver(hashLock: string, timeLock: bigint, amount: bigint, orderHash?: string): Promise<string> {
+  async createEthEscrowWithResolver(hashLock: string, timeLock: bigint, amount: bigint): Promise<string> {
     this.addLog(`🔧 User creating Arbitrum Sepolia source escrow via resolver contract...`)
     this.addLog(`💰 Amount: ${formatEther(amount)} ETH`)
     this.addLog(`⏰ Time lock: ${timeLock}`)
@@ -636,7 +634,7 @@ export class ResolverService {
     this.addLog(`🎯 Source: Arbitrum Sepolia (for ETH→SUI swap)`)
 
     const walletClient = createWalletClient({
-      account: resolver2Account, // Using resolver account for now
+      account: resolver2Account as any, // Using resolver account for now
       chain: arbitrumSepolia,
       transport: http(process.env.VITE_ETHEREUM_RPC_URL)
     })
@@ -646,7 +644,7 @@ export class ResolverService {
     
     const order = {
       salt: BigInt(Math.floor(Math.random() * 1000000)),
-      maker: resolver2Account.address,
+      maker: resolver2Account?.address as `0x${string}`,
       receiver: '0x0000000000000000000000000000000000000000', // Zero address for open fill
       makerAsset: WETH_ADDRESS,
       takerAsset: '0x0000000000000000000000000000000000000000', // Placeholder for SUI (cross-chain)
@@ -670,8 +668,8 @@ export class ResolverService {
       abi: RESOLVER_CONTRACT_ABI,
       functionName: 'deploySrc',
       args: [
-        order,
-        signature,
+        order as any,
+        signature as `0x${string}`,
         amount, // makingAmount
         amount * BigInt(1000), // takingAmount
         BigInt(0), // takerTraits
@@ -685,7 +683,7 @@ export class ResolverService {
       to: ETH_RESOLVER_CONTRACT_ADDRESS as `0x${string}`,
       data,
       value: amount, // Send ETH value for the escrow
-      gas: 800000n // Higher gas limit for resolver contract
+      gas: BigInt(800000) // Higher gas limit for resolver contract
     })
 
     this.addLog(`📋 User created source escrow via resolver: ${hash}`)
@@ -707,7 +705,7 @@ export class ResolverService {
     this.addLog(`🔄 Resolver2 starting partial fill: ${formatEther(halfAmount)} WETH`)
 
     const walletClient2 = createWalletClient({
-      account: resolver2Account,
+      account: resolver2Account as any,
       chain: arbitrumSepolia,
       transport: http(process.env.VITE_ETHEREUM_RPC_URL)
     })
@@ -725,7 +723,7 @@ export class ResolverService {
       to: WETH_ADDRESS as `0x${string}`,
       data: wrapData1,
       value: halfAmount,
-      gas: 150000n,
+      gas: BigInt(150000),
     })
     
     this.addLog(`📋 Resolver2 WETH wrap transaction hash: ${wrapHash1}`)
@@ -736,8 +734,8 @@ export class ResolverService {
         pollingInterval: 2000
       })
       this.addLog(`✅ Resolver2 ETH wrapped to WETH successfully`)
-    } catch (error: any) {
-      if (error.name === 'WaitForTransactionReceiptTimeoutError') {
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'name' in error && error.name === 'WaitForTransactionReceiptTimeoutError') {
         this.addLog(`⏰ Resolver2 WETH wrap transaction still pending, checking status...`)
         // Continue execution - transaction might still succeed
       } else {
@@ -758,7 +756,7 @@ export class ResolverService {
       account: resolver2Account,
       to: WETH_ADDRESS as `0x${string}`,
       data: approveData1,
-      gas: 150000n,
+      gas: BigInt(150000),
     })
     
     this.addLog(`📋 Resolver2 WETH approval transaction hash: ${approveHash1}`)
@@ -769,8 +767,8 @@ export class ResolverService {
         pollingInterval: 2000
       })
       this.addLog(`✅ Resolver2 WETH approved for escrow contract`)
-    } catch (error: any) {
-      if (error.name === 'WaitForTransactionReceiptTimeoutError') {
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'name' in error && error.name === 'WaitForTransactionReceiptTimeoutError') {
         this.addLog(`⏰ Resolver2 WETH approval transaction still pending, checking status...`)
         // Continue execution - transaction might still succeed
       } else {
@@ -800,7 +798,7 @@ export class ResolverService {
       account: resolver2Account,
       to: WETH_ADDRESS as `0x${string}`,
       data: unwrapData1,
-      gas: 100000n,
+      gas: BigInt(100000),
     })
     this.addLog(`📋 Resolver2 WETH unwrap transaction hash: ${unwrapHash1}`)
     try {
@@ -810,8 +808,8 @@ export class ResolverService {
         pollingInterval: 2000
       })
       this.addLog(`✅ Resolver2 WETH unwrap completed`)
-    } catch (error: any) {
-      if (error.name === 'WaitForTransactionReceiptTimeoutError') {
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'name' in error && error.name === 'WaitForTransactionReceiptTimeoutError') {
         this.addLog(`⏰ Resolver2 WETH unwrap transaction still pending, checking status...`)
         // Continue execution - transaction might still succeed
       } else {
@@ -824,7 +822,7 @@ export class ResolverService {
       account: resolver2Account,
       to: userAddress as `0x${string}`,
       value: halfAmount,
-      gas: 21000n,
+      gas: BigInt(21000),
     })
 
     this.addLog(`✅ Resolver2 transferred ${formatEther(halfAmount)} ETH to user: ${transferHash1}`)
@@ -838,7 +836,7 @@ export class ResolverService {
     this.addLog(`🔄 Resolver3 starting partial fill: ${formatEther(remainingAmount)} WETH`)
 
     const walletClient3 = createWalletClient({
-      account: resolver3Account,
+      account: resolver3Account as any,
       chain: arbitrumSepolia,
       transport: http(process.env.VITE_ETHEREUM_RPC_URL)
     })
@@ -856,7 +854,7 @@ export class ResolverService {
       to: WETH_ADDRESS as `0x${string}`,
       data: wrapData2,
       value: remainingAmount,
-      gas: 150000n,
+      gas: BigInt(150000),
     })
     
     this.addLog(`📋 Resolver3 WETH wrap transaction hash: ${wrapHash2}`)
@@ -876,7 +874,7 @@ export class ResolverService {
       account: resolver3Account,
       to: WETH_ADDRESS as `0x${string}`,
       data: approveData2,
-      gas: 150000n,
+      gas: BigInt(150000),
     })
     
     this.addLog(`📋 Resolver3 WETH approval transaction hash: ${approveHash2}`)
@@ -905,7 +903,7 @@ export class ResolverService {
       account: resolver3Account,
       to: WETH_ADDRESS as `0x${string}`,
       data: unwrapData2,
-      gas: 100000n,
+      gas: BigInt(100000),
     })
     this.addLog(`📋 Resolver3 WETH unwrap transaction hash: ${unwrapHash2}`)
     await new Promise(resolve => setTimeout(resolve, 3000))
@@ -916,7 +914,7 @@ export class ResolverService {
       account: resolver3Account,
       to: userAddress as `0x${string}`,
       value: remainingAmount,
-      gas: 21000n,
+      gas: BigInt(21000),
     })
 
     this.addLog(`✅ Resolver3 transferred ${formatEther(remainingAmount)} ETH to user: ${transferHash2}`)
@@ -935,10 +933,10 @@ export class ResolverService {
     this.addLog(`💰 Total amount: ${Number(amount) / 1e9} SUI`)
 
     // Check balance and get from faucet if necessary (same as scripts)
-    const resolver2Address = suiResolver2Keypair.getPublicKey().toSuiAddress()
-    const resolver3Address = suiResolver3Keypair.getPublicKey().toSuiAddress()
-    await this.ensureSuiBalance(resolver2Address, BigInt(1000000000)) // 2 SUI - adjusted to minimum required
-    await this.ensureSuiBalance(resolver3Address, BigInt(1000000000)) // 2 SUI - adjusted to minimum required
+    const resolver2Address = suiResolver2Keypair?.getPublicKey().toSuiAddress()
+    const resolver3Address = suiResolver3Keypair?.getPublicKey().toSuiAddress()
+    await this.ensureSuiBalance(resolver2Address as string, BigInt(1000000000)) // 2 SUI - adjusted to minimum required
+    await this.ensureSuiBalance(resolver3Address as string, BigInt(1000000000)) // 2 SUI - adjusted to minimum required
 
     // Wait for initial transaction confirmation
     await new Promise(resolve => setTimeout(resolve, 3000))
@@ -975,7 +973,7 @@ export class ResolverService {
 
     const result1 = await suiClient.signAndExecuteTransaction({
       transaction: transaction1,
-      signer: suiResolver2Keypair,
+      signer: suiResolver2Keypair as any,
       options: { showEffects: true }
     })
 
@@ -1009,7 +1007,7 @@ export class ResolverService {
 
     const result2 = await suiClient.signAndExecuteTransaction({
       transaction: transaction2,
-      signer: suiResolver3Keypair,
+      signer: suiResolver3Keypair as any,
       options: { showEffects: true }
     })
 
@@ -1019,7 +1017,7 @@ export class ResolverService {
   }
 
   // NEW: Claim ETH from user's escrow after providing SUI (for ETH→SUI swaps)
-  async claimEthFromUserEscrow(escrowImmutables: any, secret: string, amount: bigint): Promise<void> {
+  async claimEthFromUserEscrow(escrowImmutables: Record<string, unknown>, secret: string, amount: bigint): Promise<void> {
     this.addLog(`🔄 Resolvers claiming ETH from user's escrow...`)
     this.addLog(`💰 Amount to claim: ${formatEther(amount)} ETH`)
     this.addLog(`🔑 Using secret: ${secret}`)
@@ -1030,7 +1028,7 @@ export class ResolverService {
         address: ETH_RESOLVER_CONTRACT_ADDRESS as `0x${string}`,
         abi: RESOLVER_CONTRACT_ABI,
         functionName: 'addressOfEscrowSrc',
-        args: [escrowImmutables]
+        args: [escrowImmutables as any]
       })
 
       this.addLog(`📍 Source escrow contract address: ${escrowAddress}`)
@@ -1040,7 +1038,7 @@ export class ResolverService {
       this.addLog(`🔄 Resolver2 claiming ${formatEther(halfAmount)} ETH...`)
 
       const walletClient2 = createWalletClient({
-        account: resolver2Account,
+        account: resolver2Account as any,
         chain: arbitrumSepolia,
         transport: http(process.env.VITE_ETHEREUM_RPC_URL)
       })
@@ -1058,7 +1056,7 @@ export class ResolverService {
         account: resolver2Account,
         to: escrowAddress as `0x${string}`,
         data: claimData1,
-        gas: 200000n,
+        gas: BigInt(200000),
       })
 
       this.addLog(`📋 Resolver2 claimed ETH: ${claimHash1}`)
@@ -1073,7 +1071,7 @@ export class ResolverService {
       this.addLog(`🔄 Resolver3 claiming ${formatEther(remainingAmount)} ETH...`)
 
       const walletClient3 = createWalletClient({
-        account: resolver3Account,
+        account: resolver3Account as any,
         chain: arbitrumSepolia,
         transport: http(process.env.VITE_ETHEREUM_RPC_URL)
       })
@@ -1088,7 +1086,7 @@ export class ResolverService {
         account: resolver3Account,
         to: escrowAddress as `0x${string}`,
         data: claimData2,
-        gas: 200000n,
+        gas: BigInt(200000),
       })
 
       this.addLog(`📋 Resolver3 claimed ETH: ${claimHash2}`)

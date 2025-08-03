@@ -58,7 +58,7 @@ export const useMultiChainWallet = () => {
   const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
   
   const [currentChainId, setCurrentChainId] = useState<number | null>(null);
-  const [selectedEvmNetwork, setSelectedEvmNetwork] = useState<keyof typeof SUPPORTED_NETWORKS>('ARBITRUM_SEPOLIA');
+  const [selectedEvmNetwork, setSelectedEvmNetwork] = useState<keyof typeof SUPPORTED_NETWORKS>('ARBITRUM_ONE');
   const [selectedSuiNetwork, setSelectedSuiNetwork] = useState<keyof typeof SUI_NETWORKS>('TESTNET');
   const [isWrongChain, setIsWrongChain] = useState(false);
   const [isConnectingSui, setIsConnectingSui] = useState(false);
@@ -77,8 +77,25 @@ export const useMultiChainWallet = () => {
           const chainId = await ethereum.request({ method: 'eth_chainId' });
           const chainIdNumber = parseInt(chainId as string, 16);
           setCurrentChainId(chainIdNumber);
-          const targetChainId = SUPPORTED_NETWORKS[selectedEvmNetwork].chainId;
-          setIsWrongChain(chainIdNumber !== targetChainId);
+          
+          // Auto-detect and sync selectedEvmNetwork with connected chain
+          const connectedNetwork = Object.entries(SUPPORTED_NETWORKS).find(
+            ([, network]) => network.chainId === chainIdNumber
+          );
+          
+          if (connectedNetwork) {
+            const [networkKey] = connectedNetwork;
+            console.log(`🔗 Auto-detected network: ${networkKey} (Chain ID: ${chainIdNumber})`);
+            if (selectedEvmNetwork !== networkKey) {
+              setSelectedEvmNetwork(networkKey as keyof typeof SUPPORTED_NETWORKS);
+            }
+            setIsWrongChain(false);
+          } else {
+            // Chain ID doesn't match any supported network
+            const targetChainId = SUPPORTED_NETWORKS[selectedEvmNetwork].chainId;
+            setIsWrongChain(chainIdNumber !== targetChainId);
+            console.warn(`⚠️ Connected to unsupported chain ID: ${chainIdNumber}, expected: ${targetChainId}`);
+          }
         } catch (error) {
           console.error('Failed to get chain ID:', error);
         }
@@ -98,8 +115,25 @@ export const useMultiChainWallet = () => {
         if (typeof chainId === 'string') {
           const chainIdNumber = parseInt(chainId, 16);
           setCurrentChainId(chainIdNumber);
-          const targetChainId = SUPPORTED_NETWORKS[selectedEvmNetwork].chainId;
-          setIsWrongChain(chainIdNumber !== targetChainId);
+          
+          // Auto-detect and sync selectedEvmNetwork with connected chain
+          const connectedNetwork = Object.entries(SUPPORTED_NETWORKS).find(
+            ([, network]) => network.chainId === chainIdNumber
+          );
+          
+          if (connectedNetwork) {
+            const [networkKey] = connectedNetwork;
+            console.log(`🔗 Chain changed to: ${networkKey} (Chain ID: ${chainIdNumber})`);
+            if (selectedEvmNetwork !== networkKey) {
+              setSelectedEvmNetwork(networkKey as keyof typeof SUPPORTED_NETWORKS);
+            }
+            setIsWrongChain(false);
+          } else {
+            // Chain ID doesn't match any supported network
+            const targetChainId = SUPPORTED_NETWORKS[selectedEvmNetwork].chainId;
+            setIsWrongChain(chainIdNumber !== targetChainId);
+            console.warn(`⚠️ Chain changed to unsupported chain ID: ${chainIdNumber}, expected: ${targetChainId}`);
+          }
         }
       };
 
@@ -274,7 +308,7 @@ export const useMultiChainWallet = () => {
   };
 
   // Legacy function for backward compatibility
-  const switchToArbitrum = () => switchToNetwork('ARBITRUM_SEPOLIA');
+  const switchToArbitrum = () => switchToNetwork('ARBITRUM_ONE');
 
   const isAnyWalletConnected = authenticated || suiConnected;
 

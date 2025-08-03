@@ -20,13 +20,8 @@ function getRequiredEnvVar(name: string, fallback?: string): string {
   ];
   
   for (const pattern of patterns) {
-    if (typeof window !== 'undefined') {
-      // Client side: try import.meta.env and process.env
-      value = (import.meta.env as any)?.[pattern] || (process.env as any)?.[pattern] || '';
-    } else {
-      // Server side: try process.env
-      value = (process.env as any)?.[pattern] || '';
-    }
+    // Next.js environment: use process.env for both client and server
+    value = (process.env as Record<string, string>)?.[pattern] || '';
     
     if (value) {
       console.log(`✅ Found env var ${pattern}: ${value.slice(0, 10)}...`);
@@ -55,13 +50,8 @@ function getOptionalEnvVar(name: string, defaultValue: string): string {
   ];
   
   for (const pattern of patterns) {
-    if (typeof window !== 'undefined') {
-      // Client side: try import.meta.env and process.env
-      value = (import.meta.env as any)?.[pattern] || (process.env as any)?.[pattern] || '';
-    } else {
-      // Server side: try process.env
-      value = (process.env as any)?.[pattern] || '';
-    }
+    // Next.js environment: use process.env for both client and server
+    value = (process.env as Record<string, string>)?.[pattern] || '';
     
     if (value) {
       console.log(`✅ Found optional env var ${pattern}: ${value.slice(0, 10)}...`);
@@ -114,7 +104,7 @@ console.log('🔍 Environment Variables Debug:', {
   ETH_ESCROW_FACTORY_ADDRESS,
   'process.env available': typeof process !== 'undefined',
   'window available': typeof window !== 'undefined',
-  'import.meta.env available': typeof import.meta !== 'undefined' && import.meta.env
+  'import.meta.env available': false
 });
 
 // WETH ABI (same as scripts)
@@ -1298,7 +1288,7 @@ export function useCompleteSwap() {
     const data = encodeFunctionData({
       abi: RESOLVER_CONTRACT_ABI,
       functionName: 'deploySrc',
-      args: deploySrcArgs,
+      args: deploySrcArgs as any,
     })
     addLog(`🗜 Transaction data prepared (${data.length} bytes)`)
     
@@ -1709,7 +1699,7 @@ export function useCompleteSwap() {
       setTimeout(async () => {
         try {
           const ethOrderHash = keccak256(`${ethAddress}-${Date.now()}-${Math.random()}` as `0x${string}`)
-          const ethTxHash = await resolverService.createEthEscrowWithResolver(hashLock, BigInt(timeLock), finalEthAmount, ethOrderHash)
+          const ethTxHash = await resolverService.createEthEscrowWithResolver(hashLock, BigInt(timeLock), finalEthAmount)
           addLog(`📦 Arbitrum Sepolia escrow created by resolver: ${ethTxHash}`)
           addLog(`📝 ETH Order hash: ${ethOrderHash}`)
           

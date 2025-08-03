@@ -11,7 +11,6 @@ interface QuestManagerProps {
 }
 
 const QuestManager: React.FC<QuestManagerProps> = ({ className = "" }) => {
-  const [showQuestBanner, setShowQuestBanner] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);
   const [hasTriggeredConfetti, setHasTriggeredConfetti] = useState(false);
   const { activeQuest, discoveredQuests, closeQuest, getQuest, questsData } = useQuestContext();
@@ -44,6 +43,18 @@ const QuestManager: React.FC<QuestManagerProps> = ({ className = "" }) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [activeQuest, closeQuest]);
+
+  useEffect(() => {
+    if (showConfetti) {
+      document.body.style.overflow = "hidden"; // Hide scrollbar
+    } else {
+      document.body.style.overflow = "auto"; // Restore scrollbar
+    }
+
+    return () => {
+      document.body.style.overflow = "auto"; // Cleanup on unmount
+    };
+  }, [showConfetti]);
 
   return (
     <div className={className}>
@@ -185,12 +196,12 @@ const QuestManager: React.FC<QuestManagerProps> = ({ className = "" }) => {
       
       <HiddenQuest 
         questId="dutch-auction" 
-        triggerArea={{ top: "150px", right: "50px", width: "140px", height: "80px" }}
+        triggerArea={{ top: "250px", right: "50px", width: "140px", height: "80px" }}
       />
 
       <HiddenQuest 
         questId="resolvers" 
-        triggerArea={{ bottom: "200px", left: "300px", width: "100px", height: "120px" }}
+        triggerArea={{ bottom: "200px", left: "200px", width: "100px", height: "120px" }}
       />
 
       <HiddenQuest 

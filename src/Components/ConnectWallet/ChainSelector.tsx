@@ -85,7 +85,7 @@ const suiChain = {
 
 export default function ChainSelector({ isConnected }: ChainSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentChain, setCurrentChain] = useState<any>(null);
+  const [currentChain, setCurrentChain] = useState<typeof evmChains[0] | typeof suiChain | null>(null);
   const [isSwitching, setIsSwitching] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user, authenticated } = usePrivy();
@@ -124,7 +124,7 @@ export default function ChainSelector({ isConnected }: ChainSelectorProps) {
     };
 
     detectCurrentChain();
-  }, [authenticated, user]);
+  }, [authenticated, user, isSuiWallet]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -146,7 +146,7 @@ export default function ChainSelector({ isConnected }: ChainSelectorProps) {
     };
   }, [isOpen]);
 
-  const handleChainSwitch = async (chain: any) => {
+  const handleChainSwitch = async (chain: typeof evmChains[0] | typeof suiChain) => {
     if (!authenticated || !user?.wallet) return;
 
     // Check if the chain is allowed for the current wallet type
@@ -179,7 +179,7 @@ export default function ChainSelector({ isConnected }: ChainSelectorProps) {
 
         try {
           // Try to access the wallet's provider through window.ethereum
-          const ethereum = (window as any).ethereum;
+          const ethereum = (window as unknown as { ethereum?: { request?: (...args: unknown[]) => Promise<unknown> } })?.ethereum;
           if (ethereum && typeof ethereum.request === "function") {
             await ethereum.request({
               method: "wallet_switchEthereumChain",
@@ -191,12 +191,12 @@ export default function ChainSelector({ isConnected }: ChainSelectorProps) {
             setCurrentChain(chain);
             console.log(`Switched to ${chain.name} (UI only)`);
           }
-        } catch (switchError: any) {
+        } catch (switchError: unknown) {
           // If chain is not added to wallet, add it
-          if (switchError.code === 4902) {
+          if ((switchError as { code?: number })?.code === 4902) {
             try {
-              const ethereum = (window as any).ethereum;
-              if (ethereum) {
+              const ethereum = (window as unknown as { ethereum?: { request?: (...args: unknown[]) => Promise<unknown> } })?.ethereum;
+              if (ethereum && typeof ethereum.request === "function") {
                 await ethereum.request({
                   method: "wallet_addEthereumChain",
                   params: [

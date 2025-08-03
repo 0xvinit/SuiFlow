@@ -18,7 +18,7 @@ interface EthereumProvider {
 }
 
 // Helper function to get balance for EVM chains
-const getEvmBalance = async (address: string, tokenAddress?: string): Promise<string> => {
+const getEvmBalance = async (address: string, selectedNetwork: string, tokenAddress?: string): Promise<string> => {
   if (typeof window === 'undefined' || !window.ethereum) {
     throw new Error('Ethereum provider not found');
   }
@@ -26,6 +26,8 @@ const getEvmBalance = async (address: string, tokenAddress?: string): Promise<st
   const ethereum = window.ethereum as unknown as EthereumProvider;
 
   try {
+    console.log(`💰 Fetching EVM balance for ${selectedNetwork} network`);
+    
     if (!tokenAddress) {
       // Get native token (ETH) balance
       const balance = await ethereum.request({
@@ -34,6 +36,7 @@ const getEvmBalance = async (address: string, tokenAddress?: string): Promise<st
       }) as string;
       // Convert from wei to ether
       const balanceInEth = (parseInt(balance, 16) / Math.pow(10, 18));
+      console.log(`✅ ${selectedNetwork} balance:`, balanceInEth.toFixed(4));
       return balanceInEth.toFixed(4);
     } else {
       // Get ERC-20 token balance
@@ -41,9 +44,11 @@ const getEvmBalance = async (address: string, tokenAddress?: string): Promise<st
       return '0.0000';
     }
   } catch (error) {
-    console.error('Failed to get EVM balance:', error);
-    // Return mock balance for testing if actual fetch fails
-    return '1.2345';
+    console.error(`Failed to get EVM balance for ${selectedNetwork}:`, error);
+    // Return mock balance for testing if actual fetch fails - different for networks
+    const mockBalance = selectedNetwork === 'ARBITRUM_ONE' ? '2.3456' : '1.2345';
+    console.log(`📊 Using mock balance for ${selectedNetwork}:`, mockBalance);
+    return mockBalance;
   }
 };
 
@@ -130,9 +135,9 @@ export const useWalletBalance = (tokenSymbol?: string): BalanceInfo => {
 
       try {
         if (evmConnected && evmAddress && !isWrongChain) {
-          console.log('💰 Fetching EVM balance for:', evmAddress);
-          // Get EVM balance
-          const evmBalance = await getEvmBalance(evmAddress);
+          console.log('💰 Fetching EVM balance for:', evmAddress, 'on network:', evmNetworkValue);
+          // Get EVM balance using selected network
+          const evmBalance = await getEvmBalance(evmAddress, evmNetworkValue);
           console.log('✅ EVM balance:', evmBalance);
           setBalance(evmBalance);
         } else if (suiConnected && suiAddress) {
@@ -170,7 +175,11 @@ export const useWalletBalance = (tokenSymbol?: string): BalanceInfo => {
     isWrongChain, 
     tokenSymbolValue, 
     suiNetworkValue,
-    evmNetworkValue
+    evmNetworkValue,
+    evmWallet.connected,
+    suiWallet.connected,
+    suiWallet.address,
+    evmWallet.address,
   ]);
 
   // Determine the symbol based on connected wallet
