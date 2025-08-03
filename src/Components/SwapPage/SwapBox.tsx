@@ -57,6 +57,8 @@ const SwapBox = ({
     isAnyWalletConnected,
     isWrongChain,
     switchToArbitrum,
+    selectedEvmNetwork,
+    SUPPORTED_NETWORKS,
   } = useMultiChainWallet();
   // Always call the hook, but only use the result for SwapBox1
   const {
@@ -140,8 +142,10 @@ const SwapBox = ({
         if (isWrongChain) {
           return { name: "Wrong Chain", icon: defaultChainIcon, status: "error" };
         }
+        // Get the actual selected network name from the wallet hook
+        const networkName = SUPPORTED_NETWORKS[selectedEvmNetwork]?.name;
         return {
-          name: "Arbitrum One",
+          name: networkName || "Unknown Network",
           icon: getCurrentChain("arbitrum")?.icon || defaultChainIcon,
           status: "connected",
         };
@@ -173,9 +177,10 @@ const SwapBox = ({
           status: "not-connected",
         };
       } else if (suiWallet.connected) {
-        // If Sui wallet connected, show Arbitrum as opposite
+        // If Sui wallet connected, show the selected Arbitrum network as opposite
+        const networkName = SUPPORTED_NETWORKS[selectedEvmNetwork]?.name || "Arbitrum One";
         return {
-          name: "Arbitrum One",
+          name: networkName,
           icon: getCurrentChain("arbitrum")?.icon || defaultChainIcon,
           status: "not-connected",
         };
@@ -199,6 +204,18 @@ const SwapBox = ({
   };
 
   const networkInfo = getCurrentNetworkInfo();
+  
+  // Debug network selection
+  useEffect(() => {
+    console.log('🔄 SwapBox debug:', {
+      boxNumber,
+      selectedEvmNetwork,
+      evmWalletConnected: evmWallet.connected,
+      isWrongChain,
+      networkName: SUPPORTED_NETWORKS[selectedEvmNetwork]?.name,
+      networkInfo: networkInfo.name
+    });
+  }, [boxNumber, selectedEvmNetwork, evmWallet.connected, isWrongChain, SUPPORTED_NETWORKS, networkInfo.name]);
 
   // Auto-select chain when wallet connects successfully
   useEffect(() => {
@@ -250,7 +267,7 @@ const SwapBox = ({
       }
     }
     // Note: We don't auto-deselect when wallet disconnects to preserve user selection
-  }, [evmWallet.connected, suiWallet.connected, isWrongChain, selectedChain, onChainSelect, boxNumber]);
+  }, [evmWallet.connected, suiWallet.connected, isWrongChain, selectedChain, onChainSelect, boxNumber, selectedEvmNetwork]);
 
   const handleTokenSelect = (tokenName: string) => {
     // Check if the token is enabled before selecting
