@@ -201,7 +201,7 @@ const QuestManager: React.FC<QuestManagerProps> = ({ className = "" }) => {
 
       <HiddenQuest 
         questId="resolvers" 
-        triggerArea={{ bottom: "200px", left: "300px", width: "100px", height: "120px" }}
+        triggerArea={{ bottom: "200px", left: "200px", width: "100px", height: "120px" }}
       />
 
       <HiddenQuest 

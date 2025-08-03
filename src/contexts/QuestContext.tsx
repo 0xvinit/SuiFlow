@@ -62,6 +62,7 @@
 "use client";
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useQuests } from '@/hooks/useQuests';
+import { QuestData } from '@/hooks/useQuests';
 
 // interface QuestContextType {
 //   activeQuest: string | null;
@@ -79,8 +80,8 @@ interface QuestContextType {
   discoveredQuests: Set<string>;
   openQuest: (questId: string) => void;
   closeQuest: () => void;
-  getQuest: (questId: string) => any;
-  questsData: any[];
+  getQuest: (questId: string) => QuestData | null;
+  questsData: QuestData[];
 }
 const QuestContext = createContext<QuestContextType | undefined>(undefined);
 
