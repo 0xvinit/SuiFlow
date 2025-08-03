@@ -10,7 +10,7 @@ const QuestSideHeading: React.FC = () => {
       initial={{ x: -100, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
-      className="fixed left-2 xl:left-6 top-[70%] transform -translate-y-1/2 z-40 max-w-[120px] xl:max-w-[140px] 2xl:max-w-none"
+      className="fixed left-2 xl:left-6 top-[50%] transform -translate-y-1/2 z-40 max-w-[120px] xl:max-w-[140px] 2xl:max-w-none"
     >
       <div className="text-left">
         {/* Quest Heading */}

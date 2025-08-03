@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image, { StaticImageData } from "next/image";
 import { IoIosArrowDown } from "react-icons/io";
 import { ChainKey, Chain, Token } from "@/data/swapData";
@@ -7,6 +7,7 @@ import { getCurrentChain, getCurrentToken } from "@/utils/swapUtils";
 import { useTokenUSDValue } from "@/hooks/useTokenPrice";
 import { useMultiChainWallet } from "@/hooks/useMultiChainWallet";
 import { useWalletBalance } from "@/hooks/useWalletBalance";
+import { useAddressBalance } from "@/hooks/useAddressBalance";
 import { MultiChainConnect } from "../ConnectWallet/MultiChainConnect";
 
 interface SwapBoxProps {
@@ -67,13 +68,24 @@ const SwapBox = ({
     isLoading: balanceLoading,
   } = useWalletBalance(selectedToken);
   
-  // Only use real balance for SwapBox1
-  const balance = boxNumber === 1 ? walletBalance : "0.0000";
+  // Hook for fetching balance of manually entered address (SwapBox2)
+  const {
+    balance: addressBalance,
+    symbol: addressSymbol,
+    isLoading: addressBalanceLoading,
+    error: addressBalanceError,
+  } = useAddressBalance(walletInputValue, selectedChain?.toString());
+  
+  // Use appropriate balance based on box number
+  const balance = boxNumber === 1 ? walletBalance : addressBalance;
+  const symbol = boxNumber === 1 ? balanceSymbol : addressSymbol;
+  const isLoadingBalance = boxNumber === 1 ? balanceLoading : addressBalanceLoading;
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [localInputValue, setLocalInputValue] = useState("");
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [selectedChainForConnection, setSelectedChainForConnection] =
     useState<ChainKey | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Use external input value if provided, otherwise use local state
   const inputValue =
@@ -204,18 +216,26 @@ const SwapBox = ({
   };
 
   const networkInfo = getCurrentNetworkInfo();
-  
-  // Debug network selection
+
+  // Close dropdown when clicking outside
   useEffect(() => {
-    console.log('🔄 SwapBox debug:', {
-      boxNumber,
-      selectedEvmNetwork,
-      evmWalletConnected: evmWallet.connected,
-      isWrongChain,
-      networkName: SUPPORTED_NETWORKS[selectedEvmNetwork]?.name,
-      networkInfo: networkInfo.name
-    });
-  }, [boxNumber, selectedEvmNetwork, evmWallet.connected, isWrongChain, SUPPORTED_NETWORKS, networkInfo.name]);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setDropdownOpen(false);
+      }
+    };
+
+    if (dropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownOpen]);
 
   // Auto-select chain when wallet connects successfully
   useEffect(() => {
@@ -306,19 +326,26 @@ const SwapBox = ({
               {boxNumber === 1 && (
                 <div className="flex justify-end mb-2 text-[22px]">
                   Balance:{" "}
-                  {balanceLoading
+                  {isLoadingBalance
                     ? "Loading..."
-                    : `${balance} ${balanceSymbol}`}
+                    : `${balance} ${symbol}`}
                 </div>
               )}
               {boxNumber === 2 && (
                 <div className="flex justify-end mb-2 text-[22px]">
-                  Balance:{" "}0.00
+                  Balance:{" "}
+                  {addressBalanceError ? (
+                    <span className="text-red-400">Invalid Address</span>
+                  ) : isLoadingBalance ? (
+                    "Loading..."
+                  ) : (
+                    `${balance} ${symbol}`
+                  )}
                 </div>
               )}
 
               {/* Network Selection Button */}
-              <div className="relative dropdown-container">
+              <div className="relative dropdown-container" ref={dropdownRef}>
                 <div
                   className={`border rounded-md p-1.5 xl:p-2 mb-2 xl:mb-3 text-white/95 flex gap-2 items-center justify-between cursor-pointer transition-all ${
                     networkInfo.status === "error"
@@ -357,7 +384,10 @@ const SwapBox = ({
 
                 {/* Dropdown Menu */}
                 {dropdownOpen && (
-                  <div className="absolute top-full left-0 right-0 z-50 bg-[#1c1f20] border border-[#84d46c]/20 rounded-lg shadow-lg mt-1 p-3 text-[22px]">
+                  <div 
+                    className="absolute top-full left-0 right-0 z-50 bg-[#1c1f20] border border-[#84d46c]/20 rounded-lg shadow-lg mt-1 p-3 text-[22px]"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     {/* Network Selection */}
                     <div className="mb-4">
                       <h3 className="font-semibold text-[#84d46c] mb-2">

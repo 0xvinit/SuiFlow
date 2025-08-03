@@ -185,7 +185,7 @@ const QuestManager: React.FC<QuestManagerProps> = ({ className = "" }) => {
       
       <HiddenQuest 
         questId="dutch-auction" 
-        triggerArea={{ top: "150px", right: "50px", width: "140px", height: "80px" }}
+        triggerArea={{ top: "250px", right: "50px", width: "140px", height: "80px" }}
       />
 
       <HiddenQuest 
