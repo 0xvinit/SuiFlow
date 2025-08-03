@@ -253,9 +253,13 @@ const SwapBox = ({
   }, [evmWallet.connected, suiWallet.connected, isWrongChain, selectedChain, onChainSelect, boxNumber]);
 
   const handleTokenSelect = (tokenName: string) => {
-    onTokenSelect(tokenName, boxNumber);
-    // Close dropdown after selecting token
-    setDropdownOpen(false);
+    // Check if the token is enabled before selecting
+    const token = selectedChain ? tokensByChain[selectedChain].find(t => t.name === tokenName) : null;
+    if (token && token.enabled) {
+      onTokenSelect(tokenName, boxNumber);
+      // Close dropdown after selecting token
+      setDropdownOpen(false);
+    }
   };
 
   useEffect(() => {
@@ -278,10 +282,10 @@ const SwapBox = ({
 
   return (
     <>
-      <div className="border border-white/20 rounded-2xl bg-[#17191a] w-[400px] relative">
-        <div className="border-4 border-black/80 rounded-2xl p-5 pb-8 h-full w-full">
+      <div className="border border-white/20 rounded-2xl bg-[#17191a] w-[350px] xl:w-[400px] relative">
+        <div className="border-4 border-black/80 rounded-2xl p-3 xl:p-5 pb-6 xl:pb-8 h-full w-full">
           <div className="bg-black rounded-2xl p-1.5 relative grid-pattern">
-            <div className="w-full h-full rounded-2xl border border-[#84d46c] relative p-6 text-white">
+            <div className="w-full h-full rounded-2xl border border-[#84d46c] relative p-4 xl:p-6 text-white">
               {boxNumber === 1 && (
                 <div className="flex justify-end mb-2 text-[22px]">
                   Balance:{" "}
@@ -299,7 +303,7 @@ const SwapBox = ({
               {/* Network Selection Button */}
               <div className="relative dropdown-container">
                 <div
-                  className={`border rounded-md p-2 mb-3 text-white/95 flex gap-2 items-center justify-between cursor-pointer transition-all ${
+                  className={`border rounded-md p-1.5 xl:p-2 mb-2 xl:mb-3 text-white/95 flex gap-2 items-center justify-between cursor-pointer transition-all ${
                     networkInfo.status === "error"
                       ? "border-red-500 bg-red-900/20 hover:bg-red-900/30"
                       : networkInfo.status === "connected"
@@ -423,11 +427,13 @@ const SwapBox = ({
                             {tokensByChain[selectedChain].map((token) => (
                               <div
                                 key={token.name}
-                                onClick={() => handleTokenSelect(token.name)}
-                                className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition ${
-                                  selectedToken === token.name
-                                    ? "bg-[#84d46c]/10 border border-[#84d46c]/50"
-                                    : "hover:bg-[#84d46c]/10 hover:border hover:border-[#84d46c]/30"
+                                onClick={() => token.enabled && handleTokenSelect(token.name)}
+                                className={`flex items-center gap-3 p-2 rounded-lg transition relative ${
+                                  !token.enabled
+                                    ? "opacity-50 cursor-not-allowed bg-gray-800/30"
+                                    : selectedToken === token.name
+                                    ? "bg-[#84d46c]/10 border border-[#84d46c]/50 cursor-pointer"
+                                    : "hover:bg-[#84d46c]/10 hover:border hover:border-[#84d46c]/30 cursor-pointer"
                                 }`}
                               >
                                 <Image
@@ -438,6 +444,11 @@ const SwapBox = ({
                                 <span className="text-white/90 text-[20px]">
                                   {token.name}
                                 </span>
+                                {!token.enabled && (
+                                  <span className="text-xs text-gray-400 ml-auto">
+                                    Coming Soon
+                                  </span>
+                                )}
                               </div>
                             ))}
                           </div>
@@ -491,7 +502,7 @@ const SwapBox = ({
                       hasInsufficientBalance
                         ? "border-red-500"
                         : "border-white/20"
-                    } bg-[#17191a] opacity-70 rounded-md p-2 text-white/95 flex items-center justify-between gap-3`}
+                    } bg-[#17191a] opacity-70 rounded-md p-1.5 xl:p-2 text-white/95 flex items-center justify-between gap-3`}
                   >
                     {/* Token Image */}
                     <div className="flex items-center gap-2 w-1/2">
@@ -532,7 +543,7 @@ const SwapBox = ({
                   )}
                 </div>
               ) : (
-                <div className="border border-white/20 bg-[#17191a] opacity-70 rounded-md p-2 text-white/95 flex items-center justify-between gap-3">
+                <div className="border border-white/20 bg-[#17191a] opacity-70 rounded-md p-1.5 xl:p-2 text-white/95 flex items-center justify-between gap-3">
                   {/* Token Image and Static Value */}
                   <div className="flex items-center gap-2 w-1/2">
                     {getCurrentToken(selectedChain, selectedToken)?.icon ? (

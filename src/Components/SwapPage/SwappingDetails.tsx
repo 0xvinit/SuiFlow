@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { parseEther } from 'viem';
-import { usePrivy, useWallets } from '@privy-io/react-auth';
+import { usePrivy } from '@privy-io/react-auth';
 import { useCompleteSwap } from '@/hooks/useSwap';
 import { useMultiChainWallet } from '@/hooks/useMultiChainWallet';
 
@@ -9,8 +9,8 @@ interface SwappingDetailsProps {
   ethAmount?: string; // ETH amount from inputValue1
   selectedToken1?: string; // First token (usually ETH)
   selectedToken2?: string; // Second token (usually SUI)
-  selectedChain1?: string; // First chain (usually Arbitrum)
-  selectedChain2?: string; // Second chain (usually Sui)
+  selectedChain1?: string | null; // First chain (usually Arbitrum)
+  selectedChain2?: string | null; // Second chain (usually Sui)
   destinationAddress?: string; // User-provided destination address
 }
 
@@ -25,38 +25,12 @@ const SwappingDetails: React.FC<SwappingDetailsProps> = ({
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   
-  // Privy authentication and wallets
-  const { ready, authenticated, user, login } = usePrivy();
-  const { wallets } = useWallets();
+  // Privy EVM wallet connections
+  const { authenticated, user } = usePrivy();
+  const ethAddress = user?.wallet?.address;
+  const ethConnected = authenticated && !!ethAddress;
   
-  // Get Ethereum wallet from Privy - Debug wallet detection
-  console.log('🔍 Debug Privy Wallets:', { ready, authenticated, wallets });
-  console.log('🔍 Wallet details:', wallets.map(w => ({ 
-    address: w.address, 
-    walletClientType: w.walletClientType, 
-    chainType: w.chainType,
-    connectorType: w.connectorType 
-  })));
-  
-  // Try multiple ways to find Ethereum wallet - more robust detection
-  const ethWallet = wallets.find((wallet) => {
-    // Check various possible properties that indicate Ethereum wallet
-    const hasEthAddress = wallet.address && wallet.address.startsWith('0x') && wallet.address.length === 42;
-    const isEthType = wallet.walletClientType === 'ethereum';
-    const isEthChain = wallet.chainType === 'ethereum';
-    const isEthConnector = wallet.connectorType && (
-      wallet.connectorType.includes('ethereum') ||
-      wallet.connectorType.includes('metamask') ||
-      wallet.connectorType.includes('injected') ||
-      wallet.connectorType.includes('wallet_connect')
-    );
-    
-    return hasEthAddress || isEthType || isEthChain || isEthConnector;
-  }) || wallets[0]; // Fallback to first wallet if none found by type
-  
-  const ethConnected = ready && authenticated && !!ethWallet && !!ethWallet.address;
-  
-  console.log('🔍 ETH Wallet Found:', { ethWallet, ethConnected });
+  console.log('🔍 Privy Wallet Status:', { ethAddress, ethConnected, authenticated });
   
   // Sui wallet (using useMultiChainWallet for both EVM and Sui)
   const { account: suiAccount, suiWallet: suiWalletInfo } = useMultiChainWallet();
@@ -77,7 +51,8 @@ const SwappingDetails: React.FC<SwappingDetailsProps> = ({
     // calculateEthToSuiAmount, // TODO: Will be needed for dynamic rate calculation
     // calculateSuiToEthAmount, // TODO: Will be needed for dynamic rate calculation
     transactionHistory,
-    showTransactionHistory
+    showTransactionHistory,
+    testWalletConnection
   } = useCompleteSwap()
 
   // Only require source wallet connection, not destination
@@ -98,27 +73,13 @@ const SwappingDetails: React.FC<SwappingDetailsProps> = ({
   const ethAmountNumber = parseFloat(ethAmount) || 0;
   const convertedSuiAmount = isEthToSui ? ethAmountNumber * 1000 : 0; // 1 ETH = 1000 SUI
   const convertedEthAmount = isSuiToEth ? ethAmountNumber / 1000 : 0; // 1000 SUI = 1 ETH
+  
+  // Use calculated values for display
+  const convertedValue = isEthToSui ? convertedSuiAmount.toString() : convertedEthAmount.toString();
+  const inputValue1 = ethAmount;
 
   // Handle swap button click
   const handleSwap = async () => {
-    // Check Privy authentication first
-    if (!ready) {
-      alert('Privy is not ready yet. Please wait...');
-      return;
-    }
-
-    if (!authenticated) {
-      alert('Please authenticate with Privy first');
-      try {
-        await login();
-        return;
-      } catch (error) {
-        console.error('Privy login failed:', error);
-        alert('Failed to authenticate. Please try again.');
-        return;
-      }
-    }
-
     if (!sourceWalletConnected) {
       alert(`Please connect your ${isEthToSui ? 'Ethereum' : 'Sui'} wallet (source chain)`)
       return
@@ -187,9 +148,7 @@ const SwappingDetails: React.FC<SwappingDetailsProps> = ({
   // Determine button text and disabled state
   const getButtonText = () => {
     console.log('🔍 Button State Debug:', {
-      ready,
       isLoading,
-      authenticated,
       sourceWalletConnected,
       isEthToSui,
       ethConnected,
@@ -201,9 +160,7 @@ const SwappingDetails: React.FC<SwappingDetailsProps> = ({
       ethAmountValid: !!(ethAmount && parseFloat(ethAmount) > 0)
     });
     
-    if (!ready) return 'Loading Privy...';
     if (isLoading) return 'Processing...';
-    if (!authenticated) return 'Login with Privy';
     if (!sourceWalletConnected) return `Connect ${isEthToSui ? 'Ethereum' : 'Sui'} Wallet`;
     if (!isValidDestinationAddress) return 'Enter Destination Address';
     if (!isConfirmed) return 'Confirm Swap';
@@ -211,7 +168,7 @@ const SwappingDetails: React.FC<SwappingDetailsProps> = ({
     return 'Swap';
   };
 
-  const isButtonDisabled = !ready || isLoading || (!authenticated && ready) || !sourceWalletConnected || !isValidDestinationAddress || !isConfirmed || !ethAmount || parseFloat(ethAmount) <= 0;
+  const isButtonDisabled = isLoading || !sourceWalletConnected || !isValidDestinationAddress || !isConfirmed || !ethAmount || parseFloat(ethAmount) <= 0;
 
   return (
     <div className="bg-black border border-[#84d46c]/20 grid-pattern h-auto w-[670px] mx-auto rounded-lg text-white">
@@ -223,11 +180,11 @@ const SwappingDetails: React.FC<SwappingDetailsProps> = ({
             id="confirm"
             checked={isConfirmed}
             onChange={() => setIsConfirmed(!isConfirmed)}
-            className="accent-[#84d46c] mt-3"
+            className="accent-[#84d46c] mt-3 w-5 h-5 cursor-pointer"
             disabled={isLoading}
           />
-          <label htmlFor="confirm" className="text-[23px] text-white/80">
-            I confirm that I've reviewed the details and want to proceed with this swap.
+          <label htmlFor="confirm" className="text-[23px] text-white/80 cursor-pointer">
+            I confirm that I&apos;ve reviewed the details and want to proceed with this swap.
           </label>
         </div>
         {/* Toggle Details Button */}
@@ -251,32 +208,39 @@ const SwappingDetails: React.FC<SwappingDetailsProps> = ({
           <div className="text-white/60">Network Fee</div>
           <div className="text-right text-white/90">--</div>
 
-          <div className="text-white/60">You'll Receive</div>
+          <div className="text-white/60">You&apos;ll Receive</div>
           <div className="text-right text-white/90">
-            {isEthToSui && convertedSuiAmount > 0 
-              ? `${convertedSuiAmount.toFixed(6)} SUI`
-              : isSuiToEth && convertedEthAmount > 0
-              ? `${convertedEthAmount.toFixed(6)} ETH`
-              : '--'
-            }
+            {isLoading ? (
+              <span className="text-gray-400">Calculating...</span>
+            ) : convertedValue && parseFloat(convertedValue) > 0 ? (
+              `${convertedValue} ${selectedToken2}`
+            ) : (
+              <span className="text-gray-400">--</span>
+            )}
+          </div>
+
+          <div className="text-white/60">Exchange Rate</div>
+          <div className="text-right text-white/90">
+            {isLoading ? (
+              <span className="text-gray-400">--</span>
+            ) : convertedValue && inputValue1 && parseFloat(inputValue1) > 0 && parseFloat(convertedValue) > 0 ? (
+              `1 ${selectedToken1} = ${(parseFloat(convertedValue) / parseFloat(inputValue1)).toFixed(6)} ${selectedToken2}`
+            ) : (
+              <span className="text-gray-400">--</span>
+            )}
           </div>
 
           <div className="text-white/60">Estimated Time</div>
           <div className="text-right text-white/90">~1 min</div>
-
-          <div className="text-white/60">Price Impact</div>
-          <div className="text-right text-white/90">0.23%</div>
         </div>
 
         {/* Wallet Connection Status */}
         <div className="mt-4 p-3 bg-black/50 rounded border border-white/10">
           <div className="text-sm text-white/70 mb-2">Connection Status:</div>
           <div className="text-xs text-white/60">
-            <div>Privy Ready: {ready ? '✅ Ready' : '⏳ Loading...'}</div>
-            <div>Privy Auth: {authenticated ? '✅ Authenticated' : '❌ Not Authenticated'}</div>
             <div>Source Wallet ({isEthToSui ? 'Ethereum' : 'Sui'}): {sourceWalletConnected ? '✅ Connected' : '❌ Not Connected'}</div>
-            {isEthToSui && ethWallet?.address && (
-              <div className="ml-2 text-white/50">ETH: {ethWallet.address.slice(0, 6)}...{ethWallet.address.slice(-4)}</div>
+            {isEthToSui && ethAddress && (
+              <div className="ml-2 text-white/50">ETH: {ethAddress.slice(0, 6)}...{ethAddress.slice(-4)}</div>
             )}
             {isSuiToEth && suiAccount?.address && (
               <div className="ml-2 text-white/50">SUI: {suiAccount.address.slice(0, 6)}...{suiAccount.address.slice(-4)}</div>
@@ -378,6 +342,17 @@ const SwappingDetails: React.FC<SwappingDetailsProps> = ({
         )}
       </div>
 
+      {/* Test Wallet Connection Button */}
+      <div className="px-4 pb-2">
+        <button 
+          className="w-full py-2 rounded bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm transition-colors duration-200"
+          onClick={testWalletConnection}
+          disabled={isLoading}
+        >
+          Test Wallet Connection
+        </button>
+      </div>
+
       {/* Clear Logs Button */}
       {logs.length > 0 && (
         <div className="px-4 pb-4">
@@ -398,7 +373,7 @@ const SwappingDetails: React.FC<SwappingDetailsProps> = ({
             ? 'bg-gray-400 cursor-not-allowed' 
             : 'bg-gradient-to-br from-[#fff] to-[#84d46c] shadow-inner shadow-[#84d46c]/30 cursor-pointer hover:shadow-[#84d46c]/50'
         }`}
-        onClick={!authenticated && ready ? login : handleSwap}
+        onClick={handleSwap}
         disabled={isButtonDisabled}
       >
         {getButtonText()}

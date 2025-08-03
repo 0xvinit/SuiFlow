@@ -10,6 +10,7 @@ export type ChainKey = "arbitrum" | "sui";
 export interface Token {
   name: string;
   icon: string | StaticImageData;
+  enabled: boolean;
 }
 
 export interface Chain {
@@ -25,14 +26,14 @@ export const chains: Chain[] = [
 
 export const tokensByChain: Record<ChainKey, Token[]> = {
   arbitrum: [
-    { name: "ETH", icon: eth },
-    { name: "USDT", icon: usdt },
-    { name: "USDC", icon: usdc },
-    { name: "ARB", icon: arbitrum },
+    { name: "ETH", icon: eth, enabled: true },
+    { name: "USDT", icon: usdt, enabled: false },
+    { name: "USDC", icon: usdc, enabled: false },
+    { name: "ARB", icon: arbitrum, enabled: false },
   ],
   sui: [
-    { name: "USDT", icon: usdt },
-    { name: "USDC", icon: usdc },
-    { name: "SUI", icon: sui },
+    { name: "SUI", icon: sui, enabled: true },
+    { name: "USDT", icon: usdt, enabled: false },
+    { name: "USDC", icon: usdc, enabled: false },
   ],
 };

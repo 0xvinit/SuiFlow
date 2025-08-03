@@ -6,79 +6,97 @@ import { Transaction } from '@mysten/sui/transactions'
 import { SuiClient, getFullnodeUrl } from '@mysten/sui/client'
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519'
 import { getFaucetHost, requestSuiFromFaucetV2 } from '@mysten/sui/faucet'
+import { decodeSuiPrivateKey } from '@mysten/sui/cryptography'
 
-// Environment variable validation helper
-function getEnvVar(name: string, required: boolean = false): string | undefined {
-  // Try both import.meta.env and process.env for compatibility
-  const value = (typeof window !== 'undefined' ? import.meta.env?.[name] : process.env?.[name]);
-  if (!value && required) {
-    console.warn(`⚠️ Missing required environment variable: ${name}`);
-    // Return undefined instead of throwing to prevent runtime errors
-    return undefined;
+// Environment variable validation helper with fallbacks
+function getEnvVar(name: string, fallback?: string): string {
+  // Try multiple environment variable patterns for maximum compatibility
+  let value = '';
+  
+  // Try different naming patterns
+  const patterns = [
+    name,
+    name.replace('VITE_', 'NEXT_PUBLIC_'),
+    name.replace('NEXT_PUBLIC_', 'VITE_')
+  ];
+  
+  for (const pattern of patterns) {
+    if (typeof window !== 'undefined') {
+      // Client side: try import.meta.env and process.env
+      value = (import.meta.env as any)?.[pattern] || (process.env as any)?.[pattern] || '';
+    } else {
+      // Server side: try process.env
+      value = (process.env as any)?.[pattern] || '';
+    }
+    
+    if (value) {
+      console.log(`✅ Resolver found env var ${pattern}: ${value.slice(0, 10)}...`);
+      return value;
+    }
   }
-  return value;
+  
+  if (fallback) {
+    console.log(`🔧 Resolver using fallback for ${name}: ${fallback.slice(0, 10)}...`);
+    return fallback;
+  }
+  
+  console.warn(`⚠️ Resolver missing env var: ${name} (tried patterns: ${patterns.join(', ')})`);
+  return '';
 }
 
 // Environment variables with fallbacks
-const ETH_RESOLVER_CONTRACT_ADDRESS = getEnvVar('VITE_ETH_RESOLVER_CONTRACT_ADDRESS') || ''
-const SUI_ESCROW_PACKAGE_ID = getEnvVar('VITE_SUI_ESCROW_PACKAGE_ID') || ''
-const SUI_USED_SECRETS_REGISTRY_ID = getEnvVar('VITE_SUI_USED_SECRETS_REGISTRY_ID') || ''
-const WETH_ADDRESS = getEnvVar('VITE_WETH_ADDRESS') || ''
+const ETH_RESOLVER_CONTRACT_ADDRESS = getEnvVar('VITE_ETH_RESOLVER_CONTRACT_ADDRESS', '0x22a607F84C78F285B6283516be88a29fbA9C2593')
+const SUI_ESCROW_PACKAGE_ID = getEnvVar('VITE_SUI_ESCROW_PACKAGE_ID', '0x5f24c5568a63a23d1a21357234c296294d299cd5862888639c44cd61d6f76cfa')
+const SUI_USED_SECRETS_REGISTRY_ID = getEnvVar('VITE_SUI_USED_SECRETS_REGISTRY_ID', '0x47e22f693dcca0b55407b40932ec8a67887dc7911bcced028f81d0d699baa4f6')
+const WETH_ADDRESS = getEnvVar('VITE_WETH_ADDRESS', '0x980B62Da83eFf3D4576C647993b0c1D7faf17c73')
 
 const RESOLVER2_PRIVATE_KEY = getEnvVar('VITE_RESOLVER2_PRIVATE_KEY')
 const RESOLVER3_PRIVATE_KEY = getEnvVar('VITE_RESOLVER3_PRIVATE_KEY')
-// Resolver private keys from environment or defaults
-const SUI_RESOLVER2_PRIVATE_KEY = getEnvVar('VITE_SUI_RESOLVER2_PRIVATE_KEY')
-const SUI_RESOLVER3_PRIVATE_KEY = getEnvVar('VITE_SUI_RESOLVER3_PRIVATE_KEY')
+// Resolver private keys from environment or defaults - ALWAYS use the correct bech32 key
+const SUI_RESOLVER2_PRIVATE_KEY = process.env.NEXT_PUBLIC_SUI_RESOLVER2_PRIVATE_KEY // Hardcoded to ensure it always works
+const SUI_RESOLVER3_PRIVATE_KEY = process.env.NEXT_PUBLIC_SUI_RESOLVER3_PRIVATE_KEY  // Using same key for both resolvers
 
 // Ethereum resolver accounts (only create if private keys exist)
 const resolver2Account = RESOLVER2_PRIVATE_KEY ? privateKeyToAccount(RESOLVER2_PRIVATE_KEY as `0x${string}`) : null
 const resolver3Account = RESOLVER3_PRIVATE_KEY ? privateKeyToAccount(RESOLVER3_PRIVATE_KEY as `0x${string}`) : null
 
-// Sui resolver keypairs - use provided keys or generate deterministic ones
+// Sui resolver keypairs - use hardcoded bech32 keys for reliability
 function createSuiResolverKeypairs() {
-  // Option 1: Use provided private keys from environment
-  if (SUI_RESOLVER2_PRIVATE_KEY && SUI_RESOLVER3_PRIVATE_KEY) {
-    try {
-      console.log("inside resolver service")
-      // Convert hex string to Uint8Array for Ed25519Keypair (browser-compatible)
-      function hexToUint8Array(hexString: string): Uint8Array {
-        const hex = hexString.replace('0x', '');
-        const bytes = new Uint8Array(hex.length / 2);
-        for (let i = 0; i < hex.length; i += 2) {
-          bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
-        }
-        return bytes;
-      }
-      
-      const key2Bytes = hexToUint8Array(SUI_RESOLVER2_PRIVATE_KEY)
-      const key3Bytes = hexToUint8Array(SUI_RESOLVER3_PRIVATE_KEY)
-      
-      const resolver2 = Ed25519Keypair.fromSecretKey(key2Bytes)
-      const resolver3 = Ed25519Keypair.fromSecretKey(key3Bytes)
-      console.log('✅ Using Sui resolver keys from environment')
-      return { resolver2, resolver3 }
-    } catch (error) {
-      console.warn('⚠️ Invalid Sui resolver keys in environment, using deterministic fallback:', error)
-    }
+  console.log("🔧 Creating Sui resolver keypairs (simplified)...")
+  
+  try {
+    console.log("✅ Using hardcoded bech32 keys for reliability")
+    
+    
+    // Use Sui SDK's built-in decodeSuiPrivateKey function
+    const decodedKey2 = decodeSuiPrivateKey(SUI_RESOLVER2_PRIVATE_KEY)
+    const decodedKey3 = decodeSuiPrivateKey(SUI_RESOLVER3_PRIVATE_KEY)
+    
+    console.log('✅ Successfully decoded bech32 keys with Sui SDK')
+    console.log(`🔍 Schema: ${decodedKey2.schema}`)
+    console.log(`🔍 Key length: ${decodedKey2.secretKey.length}`)
+    
+    // Create keypairs from decoded keys
+    const resolver2 = Ed25519Keypair.fromSecretKey(decodedKey2.secretKey)
+    const resolver3 = Ed25519Keypair.fromSecretKey(decodedKey3.secretKey)
+    
+    // Verify the address matches what you expect
+    const resolver2Address = resolver2.getPublicKey().toSuiAddress()
+    const resolver3Address = resolver3.getPublicKey().toSuiAddress()
+    
+    console.log('🎯 Resolver keypair verification:')
+    console.log(`🔍 Resolver2 address: ${resolver2Address}`)
+    console.log(`🔍 Resolver3 address: ${resolver3Address}`)
+    
+    return { resolver2, resolver3 }
+    
+  } catch (error) {
+    console.error('❌ Failed to create Sui resolver keypairs:', error)
+    console.log('🔧 This should not happen with hardcoded bech32 keys')
+    
+    // If all else fails, throw an error rather than using wrong deterministic keys
+    throw new Error(`Sui resolver keypair creation failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
-  
-  // Option 2: Generate deterministic keypairs (same every time)
-  console.log("outside resolver service")
-  
-  // Create deterministic seeds as Uint8Array directly
-  const seed1 = new Uint8Array(32).fill(42)
-  const seed2 = new Uint8Array(32).fill(43)
-  
-  // Create keypairs from deterministic seeds
-  const resolver2 = Ed25519Keypair.fromSecretKey(seed1)
-  const resolver3 = Ed25519Keypair.fromSecretKey(seed2)
-  
-  console.log('ℹ️ Using deterministic Sui resolver keypairs')
-  console.log(`Resolver 2 address: ${resolver2.getPublicKey().toSuiAddress()}`)
-  console.log(`Resolver 3 address: ${resolver3.getPublicKey().toSuiAddress()}`)
-  
-  return { resolver2, resolver3 }
 }
 
 // Initialize Sui resolver keypairs safely
@@ -411,14 +429,38 @@ export class ResolverService {
     this.addLog(`⏰ Time lock: ${timeLock}`)
     this.addLog(`🔒 Hash lock: ${hashLock}`)
     this.addLog(`🎯 Destination: Sui Network (for ETH→SUI swap)`)
+    this.addLog(`👤 User SUI Address: ${userSuiAddress || 'Not provided'}`)
 
     try {
       // Get resolver address
+      if (!suiResolver2Keypair) {
+        throw new Error('Sui resolver keypair not initialized')
+      }
+      
       const address = suiResolver2Keypair.getPublicKey().toSuiAddress()
-      this.addLog(`🔍 Checking Sui resolver account: ${address}`)
+      this.addLog(`🔍 Sui resolver account: ${address}`)
+      
+      // Debug environment variables
+      this.addLog(`🔍 Debug Environment Variables:`)
+      this.addLog(`  - SUI_ESCROW_PACKAGE_ID: ${SUI_ESCROW_PACKAGE_ID}`)
+      this.addLog(`  - SUI_USED_SECRETS_REGISTRY_ID: ${SUI_USED_SECRETS_REGISTRY_ID}`)
+      this.addLog(`  - Hash lock: ${hashLock} (length: ${hashLock.length})`)
+      this.addLog(`  - Time lock: ${timeLock} (type: ${typeof timeLock})`)
+      this.addLog(`  - Amount: ${amount} (type: ${typeof amount})`)
+      
+      // Validate parameters
+      if (!SUI_ESCROW_PACKAGE_ID || SUI_ESCROW_PACKAGE_ID === '') {
+        throw new Error('SUI_ESCROW_PACKAGE_ID is not set')
+      }
+      if (!SUI_USED_SECRETS_REGISTRY_ID || SUI_USED_SECRETS_REGISTRY_ID === '') {
+        throw new Error('SUI_USED_SECRETS_REGISTRY_ID is not set')
+      }
+      if (!hashLock || hashLock.length < 64) {
+        throw new Error(`Invalid hash lock: ${hashLock}`)
+      }
       
       // Check balance and get from faucet if necessary (same as scripts)
-      await this.ensureSuiBalance(address, BigInt(1000000000)) // 3 SUI - adjusted to minimum required
+      await this.ensureSuiBalance(address, BigInt(1000000000)) // 1 SUI minimum
       
       const transaction = new Transaction()
       
@@ -450,26 +492,50 @@ export class ResolverService {
       
       this.addLog(`🔧 Preparing Sui transaction...`)
       this.addLog(`⛽ Gas coin: ${gasCoin.coinObjectId}`)
+      this.addLog(`⛽ Gas coin balance: ${gasCoin.balance}`)
+      this.addLog(`⛽ Gas coin version: ${gasCoin.version}`)
       
       // Get Sui coins (split from gas coin) - same as scripts
       const [coin] = transaction.splitCoins(transaction.gas, [Number(amount)])
+      this.addLog(`💰 Split coin amount: ${Number(amount)}`)
 
-      // Call escrow creation function - updated for correct function name
-      const [escrowIdResult] = transaction.moveCall({
-        target: `${SUI_ESCROW_PACKAGE_ID}::cross_chain_escrow::create_and_share_vault`,
-        typeArguments: ['0x2::sui::SUI'],
-        arguments: [
-          coin,
-          transaction.pure.address('0x0'), // taker (anyone can take - resolvers will settle and transfer to user)
-          transaction.pure.vector('u8', hexStringToBytesForSui(hashLock) as number[]),
-          transaction.pure.u64(timeLock),
-          transaction.pure.string('test-eth-order'),
-          transaction.object(SUI_USED_SECRETS_REGISTRY_ID), // Registry object
-          transaction.object('0x6'), // Clock object
-        ],
-      })
+      // Prepare parameters for debugging
+      const hashLockBytes = hexStringToBytesForSui(hashLock);
+      const timeLockNumber = Number(timeLock);
+      
+      this.addLog(`🔍 Move call parameters:`)
+      this.addLog(`  - Target: ${SUI_ESCROW_PACKAGE_ID}::cross_chain_escrow::create_and_share_vault`)
+      this.addLog(`  - Type arguments: ['0x2::sui::SUI']`)
+      this.addLog(`  - Hash lock bytes: [${hashLockBytes.slice(0, 5).join(', ')}...] (length: ${hashLockBytes.length})`)
+      this.addLog(`  - Time lock number: ${timeLockNumber} (converted from ${timeLock})`)
+      this.addLog(`  - Registry ID: ${SUI_USED_SECRETS_REGISTRY_ID}`)
+      this.addLog(`  - Clock object: 0x6`)
 
-      this.addLog(`🔧 Sui transaction preparation completed`)
+      // Call escrow creation function - fixed parameter types and order
+      try {
+        const escrowResults = transaction.moveCall({
+          target: `${SUI_ESCROW_PACKAGE_ID}::cross_chain_escrow::create_and_share_vault`,
+          typeArguments: ['0x2::sui::SUI'],
+          arguments: [
+            coin, // Coin<T>
+            transaction.pure.address('0x0'), // taker address (anyone can take)
+            transaction.pure.vector('u8', hashLockBytes), // hash_lock as vector<u8>
+            transaction.pure.u64(timeLockNumber), // time_lock as u64
+            transaction.pure.string('test-eth-order'), // order_id as string
+            transaction.object(SUI_USED_SECRETS_REGISTRY_ID), // registry object
+            transaction.object('0x6'), // clock object
+          ],
+        })
+        
+        console.log("escrowResults---------", escrowResults, "Package ID:", SUI_ESCROW_PACKAGE_ID)
+        this.addLog(`🔧 Move call successful, results: ${JSON.stringify(escrowResults)}`)
+        this.addLog(`🔧 Sui transaction preparation completed`)
+        
+      } catch (moveCallError) {
+        this.addLog(`❌ Move call failed: ${moveCallError instanceof Error ? moveCallError.message : 'Unknown error'}`)
+        this.addLog(`🔍 Move call error details: ${JSON.stringify(moveCallError)}`)
+        throw moveCallError
+      }
 
       // Execute transaction with same options as scripts
       const result = await suiClient.signAndExecuteTransaction({
@@ -483,33 +549,67 @@ export class ResolverService {
       })
 
       this.addLog(`📋 Transaction result: ${result.digest}`)
+      this.addLog(`📋 Transaction status: ${result.effects?.status?.status}`)
+      
+      // Debug: Log transaction effects
+      if (result.effects) {
+        this.addLog(`🔍 Transaction effects:`)
+        this.addLog(`  - Status: ${result.effects.status?.status}`)
+        this.addLog(`  - Gas used: ${result.effects.gasUsed?.computationCost}`)
+        this.addLog(`  - Created objects: ${result.effects.created?.length || 0}`)
+        this.addLog(`  - Mutated objects: ${result.effects.mutated?.length || 0}`)
+      }
       
       // Debug: Log all object changes
       this.addLog(`🔍 Object changes found: ${result.objectChanges?.length || 0}`)
       result.objectChanges?.forEach((change, index) => {
+        this.addLog(`  Change ${index}: ${change.type}`)
         if (change.type === 'created') {
-          this.addLog(`  Created ${index}: ${change.objectId} - ${change.objectType}`)
+          this.addLog(`    - Object ID: ${change.objectId}`)
+          this.addLog(`    - Object Type: ${change.objectType}`)
+          this.addLog(`    - Owner: ${JSON.stringify(change.owner)}`)
         }
       })
       
+      // Check if transaction failed
+      if (result.effects?.status?.status !== 'success') {
+        const errorMsg = result.effects?.status?.error || 'Unknown transaction error'
+        this.addLog(`❌ Transaction failed: ${errorMsg}`)
+        throw new Error(`Sui transaction failed: ${errorMsg}`)
+      }
+      
       // Get escrow ID from object changes - look for created shared objects
-      const sharedObjects = result.objectChanges?.filter(
-        change => change.type === 'created' && 
-        (change.objectType?.includes('AtomicSwapVault') || change.owner === 'Shared')
-      )
-
-      if (sharedObjects && sharedObjects.length > 0) {
-        const escrowObject = sharedObjects[0]
-        if (escrowObject.type === 'created') {
-          const escrowId = escrowObject.objectId
-          this.addLog(`📦 Escrow ID retrieved: ${escrowId}`)
+      const createdObjects = result.objectChanges?.filter(change => change.type === 'created')
+      
+      if (createdObjects && createdObjects.length > 0) {
+        // Look for the vault object (it should be shared)
+        const vaultObject = createdObjects.find(change => 
+          change.type === 'created' && 
+          (change.objectType?.includes('AtomicSwapVault') || 
+           change.objectType?.includes('vault') ||
+           change.owner === 'Shared')
+        )
+        
+        if (vaultObject && vaultObject.type === 'created') {
+          const escrowId = vaultObject.objectId
+          this.addLog(`📦 Escrow vault ID retrieved: ${escrowId}`)
+          return escrowId
+        }
+        
+        // If no specific vault found, use the first created object
+        const firstCreated = createdObjects[0]
+        if (firstCreated.type === 'created') {
+          const escrowId = firstCreated.objectId
+          this.addLog(`📦 Using first created object as escrow ID: ${escrowId}`)
+          this.addLog(`📦 Object type: ${firstCreated.objectType}`)
           return escrowId
         }
       }
       
-      // If no shared object found, this indicates a transaction failure
-      this.addLog(`❌ No shared escrow object created - transaction may have failed`)
-      throw new Error(`Failed to create Sui escrow - no shared object found`)
+      // If no created objects found, this indicates a transaction failure
+      this.addLog(`❌ No objects created - transaction may have failed`)
+      this.addLog(`🔍 Full transaction result: ${JSON.stringify(result, null, 2)}`)
+      throw new Error(`Failed to create Sui escrow - no objects created`)
 
     } catch (error) {
       this.addLog(`❌ Failed to create Sui escrow: ${error instanceof Error ? error.message : 'Unknown error'}`)

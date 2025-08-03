@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { usePrivy } from "@privy-io/react-auth";
+import { useMultiChainWallet } from "@/hooks/useMultiChainWallet";
 import {
   FaWallet,
   FaTimes,
@@ -127,15 +128,20 @@ export default function ConnectWallet() {
   const [activeTab, setActiveTab] = useState<"evm" | "sui">("evm");
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
-  const { login, ready, authenticated, user, logout } = usePrivy();
+  
+  // Use Privy for EVM wallet connection
+  const { authenticated, user, login, logout } = usePrivy();
+  
+  // Use MultiChainWallet hook for both EVM and Sui wallet states
+  const { evmWallet, suiWallet, isAnyWalletConnected } = useMultiChainWallet();
 
-  // Check if user is authenticated and close modal
+  // Check if user is connected and close modal
   useEffect(() => {
-    if (authenticated && isOpen) {
+    if (isAnyWalletConnected && isOpen) {
       setIsOpen(false);
       setConnectionError(null);
     }
-  }, [authenticated, isOpen]);
+  }, [isAnyWalletConnected, isOpen]);
 
   const handleWalletSelect = async (
     walletName: string,
@@ -146,18 +152,19 @@ export default function ConnectWallet() {
       setIsConnecting(true);
       setConnectionError(null);
 
-      if (walletType === "sui") {
-        // For SUI wallets, provide specific instructions
-        console.log(`Connecting to SUI wallet: ${walletName}`);
-
-        // Show Privy's modal but with instructions for SUI wallet
-        await login();
-
-        // After connection, we'll need to verify it's actually a SUI wallet
-        // This will be handled in the useEffect that detects the wallet type
-      } else {
-        // For EVM wallets, use the default login
-        await login();
+      if (walletType === "evm") {
+        // Use Privy login for EVM wallet connection
+        if (!authenticated) {
+          await login();
+        }
+      } else if (walletType === "sui") {
+        // Use the multichain wallet hook for Sui connection
+        try {
+          await suiWallet.connect();
+        } catch (error) {
+          setConnectionError("Failed to connect SUI wallet. Please try again.");
+          console.error("SUI wallet connection error:", error);
+        }
       }
     } catch (error) {
       console.error("Failed to connect wallet:", error);
@@ -176,7 +183,12 @@ export default function ConnectWallet() {
 
   const handleDisconnect = async () => {
     try {
-      await logout();
+      if (evmWallet.connected) {
+        evmWallet.disconnect();
+      }
+      if (suiWallet.connected) {
+        suiWallet.disconnect();
+      }
       console.log("Successfully disconnected wallet");
     } catch (error) {
       console.error("Failed to disconnect wallet:", error);
@@ -185,17 +197,18 @@ export default function ConnectWallet() {
 
   // Get wallet address for display
   const getWalletAddress = () => {
-    if (authenticated && user?.wallet?.address) {
-      return `${user.wallet.address.slice(0, 6)}...${user.wallet.address.slice(
-        -4
-      )}`;
+    if (evmWallet.connected && evmWallet.address) {
+      return `${evmWallet.address.slice(0, 6)}...${evmWallet.address.slice(-4)}`;
+    }
+    if (suiWallet.connected && suiWallet.address) {
+      return `${suiWallet.address.slice(0, 6)}...${suiWallet.address.slice(-4)}`;
     }
     return "";
   };
 
   // Get button text
   const getButtonText = () => {
-    if (authenticated && user?.wallet?.address) {
+    if (isAnyWalletConnected) {
       return getWalletAddress();
     }
     return "Connect Wallet";
@@ -205,13 +218,13 @@ export default function ConnectWallet() {
     <>
       <div className="flex items-center gap-3 font-vt323 tracking-wider">
         {/* Chain Selector */}
-        <ChainSelector isConnected={authenticated} />
+        <ChainSelector isConnected={isAnyWalletConnected} />
 
         {/* Connect/Disconnect Button */}
         <div className="relative inline-block text-left">
           <button
             onClick={() =>
-              authenticated ? handleDisconnect() : setIsOpen(true)
+              isAnyWalletConnected ? handleDisconnect() : setIsOpen(true)
             }
             className="px-8 py-2 rounded-full text-black font-semibold bg-gradient-to-br from-[#fff] to-[#84d46c] shadow-inner shadow-[#84d46c]/30 transition cursor-pointer duration-300 hover:scale-105 hover:shadow-lg hover:shadow-[#84d46c]/50 uppercase w-fit text-[20px]"
           >
@@ -310,7 +323,7 @@ export default function ConnectWallet() {
                           Choose Your EVM Wallet
                         </h3>
                         <p className="text-base text-gray-300 font-vt323 tracking-wider">
-                          Click on any wallet below to open the wallet selection
+                          Click on any wallet below to open the Privy wallet selection
                           popup. Choose from MetaMask, WalletConnect, Coinbase
                           Wallet, or other EVM-compatible wallets.
                         </p>
@@ -368,7 +381,7 @@ export default function ConnectWallet() {
                           Choose Your SUI Wallet
                         </h3>
                         <p className="text-base text-gray-300 font-vt323 tracking-wider">
-                          Click on any wallet below to open the wallet selection
+                          Click on any wallet below to open the Sui wallet selection
                           popup. Look for <strong>Phantom</strong>,{" "}
                           <strong>Backpack</strong>,{" "}
                           <strong>Trust Wallet</strong>, or{" "}

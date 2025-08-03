@@ -6,6 +6,7 @@ import Footer from "@/Components/SwapPage/Footer";
 import "../Styles/fonts.module.css";
 import styles from "@/Styles/gradientAnimations.module.css";
 import Navbar from "@/Components/Navbar/Navbar";
+import QuestManager from "@/Components/Quest/QuestManager";
 
 export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -80,6 +81,7 @@ export default function Home() {
   }, []);
 
   return (
+    <>
     <div
       ref={containerRef}
       className="font-vt323 tracking-wider min-h-screen relative overflow-hidden backdrop-blur-md"
@@ -131,6 +133,10 @@ export default function Home() {
         <SwapPage />
       </div>
       <Footer />
+      
     </div>
+      {/* Quest System */}
+      <QuestManager />
+    </>
   );
 }

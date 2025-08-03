@@ -20,8 +20,61 @@ export const MultiChainProvider: React.FC<MultiChainProviderProps> = ({ children
           loginMethods: ['email', 'wallet'],
           appearance: {
             theme: 'dark',
-            accentColor: '#676FFF',
+            accentColor: '#84d46c',
+            logo: undefined,
           },
+          embeddedWallets: {
+            createOnLogin: 'users-without-wallets',
+            requireUserPasswordOnCreate: false,
+          },
+          defaultChain: {
+            id: 421614, // Arbitrum Sepolia
+            name: 'Arbitrum Sepolia',
+            nativeCurrency: {
+              name: 'Arbitrum ETH',
+              symbol: 'ETH',
+              decimals: 18,
+            },
+            rpcUrls: {
+              default: {
+                http: ['https://sepolia-rollup.arbitrum.io/rpc'],
+              },
+              public: {
+                http: ['https://sepolia-rollup.arbitrum.io/rpc'],
+              },
+            },
+            blockExplorers: {
+              default: {
+                name: 'Arbiscan',
+                url: 'https://sepolia.arbiscan.io',
+              },
+            },
+          },
+          supportedChains: [
+            {
+              id: 421614, // Arbitrum Sepolia
+              name: 'Arbitrum Sepolia',
+              nativeCurrency: {
+                name: 'Arbitrum ETH',
+                symbol: 'ETH',
+                decimals: 18,
+              },
+              rpcUrls: {
+                default: {
+                  http: ['https://sepolia-rollup.arbitrum.io/rpc'],
+                },
+                public: {
+                  http: ['https://sepolia-rollup.arbitrum.io/rpc'],
+                },
+              },
+              blockExplorers: {
+                default: {
+                  name: 'Arbiscan',
+                  url: 'https://sepolia.arbiscan.io',
+                },
+              },
+            },
+          ],
         }}
       >
         <SuiClientProvider>
