@@ -13,6 +13,10 @@ export interface Chain {
     decimals: number;
   };
 }
+interface EthereumProvider {
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+  // add more properties if needed
+}
 
 export function useChainDetection() {
   const [currentChain, setCurrentChain] = useState<Chain | null>(null);
@@ -25,10 +29,11 @@ export function useChainDetection() {
     setIsDetecting(true);
     try {
       // Try to get the current chain ID from the wallet
-      const ethereum = (window as any).ethereum;
+      
+      const ethereum = (window as unknown as { ethereum?: EthereumProvider }).ethereum;
       if (ethereum && typeof ethereum.request === "function") {
         const chainId = await ethereum.request({ method: "eth_chainId" });
-        const chainIdDecimal = parseInt(chainId, 16);
+        const chainIdDecimal = parseInt(chainId as string, 16);
 
         // You can expand this with your chain list
         const knownChains: Chain[] = [
@@ -69,7 +74,7 @@ export function useChainDetection() {
     if (!authenticated || !user?.wallet) return false;
 
     try {
-      const ethereum = (window as any).ethereum;
+      const ethereum = (window as unknown as { ethereum?: EthereumProvider }).ethereum;
       if (ethereum && typeof ethereum.request === "function") {
         const chainId = `0x${
           typeof chain.id === "number" ? chain.id.toString(16) : chain.id
@@ -82,9 +87,14 @@ export function useChainDetection() {
           });
           setCurrentChain(chain);
           return true;
-        } catch (switchError: any) {
-          // If chain is not added to wallet, add it
-          if (switchError.code === 4902) {
+        } catch (switchError: unknown) {
+          // switchError is unknown, so we need to safely check its code property
+          if (
+            typeof switchError === "object" &&
+            switchError !== null &&
+            "code" in switchError &&
+            (switchError as { code?: unknown }).code === 4902
+          ) {
             try {
               await ethereum.request({
                 method: "wallet_addEthereumChain",

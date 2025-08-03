@@ -45,6 +45,18 @@ const QuestManager: React.FC<QuestManagerProps> = ({ className = "" }) => {
     };
   }, [activeQuest, closeQuest]);
 
+  useEffect(() => {
+    if (showConfetti) {
+      document.body.style.overflow = "hidden"; // Hide scrollbar
+    } else {
+      document.body.style.overflow = "auto"; // Restore scrollbar
+    }
+
+    return () => {
+      document.body.style.overflow = "auto"; // Cleanup on unmount
+    };
+  }, [showConfetti]);
+
   return (
     <div className={className}>
       {/* Quest Discovery Banner */}

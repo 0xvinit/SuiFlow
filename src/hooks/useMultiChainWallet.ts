@@ -75,7 +75,7 @@ export const useMultiChainWallet = () => {
           
           // Auto-detect and sync selectedEvmNetwork with connected chain
           const connectedNetwork = Object.entries(SUPPORTED_NETWORKS).find(
-            ([key, network]) => network.chainId === chainIdNumber
+            ([, network]) => network.chainId === chainIdNumber
           );
           
           if (connectedNetwork) {
@@ -113,7 +113,7 @@ export const useMultiChainWallet = () => {
           
           // Auto-detect and sync selectedEvmNetwork with connected chain
           const connectedNetwork = Object.entries(SUPPORTED_NETWORKS).find(
-            ([key, network]) => network.chainId === chainIdNumber
+            ([, network]) => network.chainId === chainIdNumber
           );
           
           if (connectedNetwork) {

@@ -41,16 +41,7 @@ const QuestConfetti: React.FC<QuestConfettiProps> = ({ isActive, onClose }) => {
 
   return (
     <>
-      {/* Confetti */}
-      <Confetti
-        width={windowDimensions.width}
-        height={windowDimensions.height}
-        recycle={false}
-        numberOfPieces={300}
-        gravity={0.3}
-        colors={['#84d46c', '#4ade80', '#22c55e', '#16a34a', '#15803d', '#ffffff']}
-        onConfettiComplete={() => setConfettiComplete(true)}
-      />
+      
 
       {/* Celebration Modal */}
       <AnimatePresence>
@@ -58,7 +49,7 @@ const QuestConfetti: React.FC<QuestConfettiProps> = ({ isActive, onClose }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
           onClick={(e) => {
             // Close when clicking on backdrop
             if (e.target === e.currentTarget) {
@@ -215,6 +206,17 @@ const QuestConfetti: React.FC<QuestConfettiProps> = ({ isActive, onClose }) => {
             </motion.div>
           </motion.div>
       </AnimatePresence>
+      {/* Confetti */}
+      <Confetti
+        width={windowDimensions.width}
+        height={windowDimensions.height}
+        recycle={false}
+        numberOfPieces={300}
+        gravity={0.3}
+        colors={['#84d46c', '#4ade80', '#22c55e', '#16a34a', '#15803d', '#ffffff']}
+        onConfettiComplete={() => setConfettiComplete(true)}
+        className="confetti-custom"
+      />
     </>
   );
 };

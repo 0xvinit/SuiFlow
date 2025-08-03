@@ -12,9 +12,9 @@ interface AddressBalanceInfo {
 }
 
 // Type for Ethereum provider
-interface EthereumProvider {
-  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
-}
+// interface EthereumProvider {
+//   request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+// }
 
 // Helper function to get balance for EVM chains by address
 const getEvmBalanceByAddress = async (address: string, networkKey: string): Promise<string> => {
@@ -141,8 +141,6 @@ export const useAddressBalance = (
   const { 
     selectedEvmNetwork,
     selectedSuiNetwork,
-    SUPPORTED_NETWORKS,
-    SUI_NETWORKS 
   } = useMultiChainWallet();
   
   const [balance, setBalance] = useState<string>('0.0000');

@@ -127,7 +127,7 @@ export default function ConnectWallet() {
   const [activeTab, setActiveTab] = useState<"evm" | "sui">("evm");
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
-  const { login, ready, authenticated, user, logout } = usePrivy();
+  const { login, authenticated, user, logout } = usePrivy();
 
   // Check if user is authenticated and close modal
   useEffect(() => {

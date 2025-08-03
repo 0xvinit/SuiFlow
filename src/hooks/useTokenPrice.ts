@@ -179,9 +179,9 @@ const useTokenPrices = () => {
 export const useTokenUSDValue = (tokenName: string | null, amount: string) => {
   const tokens = useTokenPrices();
   const [usdValue, setUsdValue] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
-  const [debouncedAmount, setDebouncedAmount] = useState(amount);
-  const debounceRef = useRef<NodeJS.Timeout>();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [debouncedAmount, setDebouncedAmount] = useState<string>(amount);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Debounce amount changes to prevent excessive calculations
   useEffect(() => {
