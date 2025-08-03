@@ -88,7 +88,7 @@ const Heading = () => {
       onMouseLeave={() => setTooltipVisible(false)}
       onMouseMove={handleMouseMove}
     >
-      <h1 className={`text-[60px] lg:text-[70px] xl:text-[80px] leading-[70px] lg:leading-[80px] xl:leading-[100px] tracking-wider uppercase font-vt323`}>
+      <h1 className="text-[60px] lg:text-[70px] xl:text-[80px] leading-[70px] lg:leading-[80px] xl:leading-[100px] tracking-wider uppercase font-vt323 text-white">
         Cross Chain Swap
       </h1>
 
